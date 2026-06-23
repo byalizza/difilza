@@ -14,6 +14,10 @@ app.use(cors());
 app.use(express.json());
 
 function readFilms() {
+    const dataDir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
     if (!fs.existsSync(DATA_FILE)) {
         fs.writeFileSync(DATA_FILE, JSON.stringify([]));
     }
@@ -22,6 +26,10 @@ function readFilms() {
 }
 
 function writeFilms(films) {
+    const dataDir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
     fs.writeFileSync(DATA_FILE, JSON.stringify(films, null, 2));
 }
 
