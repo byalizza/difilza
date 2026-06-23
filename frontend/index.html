@@ -99,20 +99,25 @@
             }
         }
 
-        const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
-        const wasOnFilm = localStorage.getItem('difilza_on_film');
-        if (wasOnFilm === 'true') {
-            localStorage.setItem('difilza_on_film', 'false');
-            audio.play().catch(() => {});
-        } else if (wasPlaying === 'true') {
-            audio.play().catch(() => {});
+        function tryResume() {
+            const onFilm = localStorage.getItem('difilza_on_film');
+            if (onFilm === 'true') {
+                localStorage.setItem('difilza_on_film', 'false');
+                audio.play().catch(() => {});
+            } else {
+                const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
+                if (wasPlaying === 'true') audio.play().catch(() => {});
+            }
         }
+
+        window.addEventListener('pageshow', tryResume);
+        tryResume();
 
         document.addEventListener('click', () => {
             if (audio.paused) {
                 audio.play().catch(() => {});
             }
-        }, { once: true });
+        });
 
         window.addEventListener('beforeunload', () => {
             audio.pause();
