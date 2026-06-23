@@ -385,6 +385,46 @@
                 </div>
 
                 <div class="form-section">
+                    <h2>Toplu Film Ekle</h2>
+                    <p style="color:#666;font-size:13px;margin-bottom:15px">Format: <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">film_url -> embed_url</code> (satır satır yapıştır)</p>
+                    <div class="form-group">
+                        <textarea id="bulkInput" placeholder="https://www.fullhdfilmizlesene.life/film/batman/ -> https://rapidvid.net/vod/xxx&#10;https://www.fullhdfilmizlesene.life/film/superman/ -> https://rapidvid.net/vod/yyy" style="min-height:200px;font-family:monospace;font-size:12px"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select id="bulkCategory">
+                                <option value="Animasyon">Animasyon</option>
+                                <option value="Aksiyon">Aksiyon</option>
+                                <option value="Komedi">Komedi</option>
+                                <option value="Korku">Korku</option>
+                                <option value="Bilim Kurgu">Bilim Kurgu</option>
+                                <option value="Dram">Dram</option>
+                                <option value="Romantik">Romantik</option>
+                                <option value="Macera">Macera</option>
+                                <option value="Gerilim">Gerilim</option>
+                                <option value="Suç">Suç</option>
+                                <option value="Fantastik">Fantastik</option>
+                                <option value="Savaş">Savaş</option>
+                                <option value="Genel">Genel</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="bulkProgress" style="display:none;margin-bottom:15px">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px">
+                            <div id="bulkStatus" style="margin-bottom:10px;font-size:14px"></div>
+                            <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:8px;overflow:hidden">
+                                <div id="bulkBar" style="background:#6c5ce7;height:100%;width:0%;transition:width 0.3s;border-radius:4px"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="bulkAddFilms()" id="bulkBtn">Toplu Ekle</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('bulkInput').value=''">Temizle</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
                     <h2>Filmler</h2>
                     <div class="search-bar">
                         <input type="text" id="searchInput" placeholder="Film ara..." oninput="searchFilms()">
@@ -596,6 +636,83 @@
             document.getElementById('filmYear').value = '';
             document.getElementById('filmImdb').value = '';
             document.getElementById('filmDescription').value = '';
+        }
+
+        function extractTitle(url) {
+            const slug = url.split('/film/')[1]?.replace(/\/$/, '').replace(/-fh\d*$/i, '') || '';
+            return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        async function searchTMDB(title) {
+            try {
+                const TMDB_KEY = '69a87754059ce146a5d322ae235a1702';
+                const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`);
+                const data = await res.json();
+                if (data.results && data.results[0]) {
+                    const m = data.results[0];
+                    return {
+                        originalTitle: m.original_title || '',
+                        year: (m.release_date || '').substring(0, 4),
+                        poster: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
+                        description: m.overview || ''
+                    };
+                }
+            } catch (e) {}
+            return { originalTitle: '', year: '', poster: '', description: '' };
+        }
+
+        async function bulkAddFilms() {
+            const input = document.getElementById('bulkInput').value.trim();
+            const category = document.getElementById('bulkCategory').value;
+            if (!input) { showStatus('Metin yapıştırın!', 'error'); return; }
+
+            const lines = input.split('\n').filter(l => l.includes('->') && !l.includes('BULUNAMADI'));
+            if (!lines.length) { showStatus('Geçerli satır bulunamadı!', 'error'); return; }
+
+            const progress = document.getElementById('bulkProgress');
+            const bar = document.getElementById('bulkBar');
+            const status = document.getElementById('bulkStatus');
+            const btn = document.getElementById('bulkBtn');
+            progress.style.display = 'block';
+            btn.disabled = true;
+            btn.textContent = 'Ekleniyor...';
+
+            let added = 0, failed = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const parts = lines[i].split('->');
+                const filmUrl = parts[0].trim();
+                const embedUrl = parts[1].trim();
+                const title = extractTitle(filmUrl);
+
+                status.textContent = `[${i+1}/${lines.length}] ${title} ekleniyor...`;
+                bar.style.width = `${((i+1)/lines.length)*100}%`;
+
+                const tmdb = await searchTMDB(title);
+
+                try {
+                    const res = await fetch(`${API_URL}/api/films`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
+                        body: JSON.stringify({
+                            title,
+                            originalTitle: tmdb.originalTitle,
+                            embedUrl,
+                            poster: tmdb.poster,
+                            category,
+                            year: tmdb.year,
+                            imdb: '',
+                            description: tmdb.description
+                        })
+                    });
+                    if (res.ok) added++; else failed++;
+                } catch (e) { failed++; }
+            }
+
+            status.textContent = `Tamamlandı! ${added} eklendi, ${failed} başarısız`;
+            btn.disabled = false;
+            btn.textContent = 'Toplu Ekle';
+            loadFilms();
         }
     </script>
 </body>
