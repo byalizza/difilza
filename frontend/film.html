@@ -118,6 +118,16 @@
             font-size: 15px;
         }
 
+        .film-actors {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .film-actors strong {
+            color: #aaa;
+        }
+
         .loading-player {
             width: 100%;
             aspect-ratio: 16/9;
@@ -178,6 +188,7 @@
                         <span class="imdb" id="filmImdb">⭐ -</span>
                         <span class="category" id="filmCategory">📁 -</span>
                     </div>
+                    <div class="film-actors" id="filmActors"></div>
                     <p class="film-description" id="filmDescription"></p>
                 </div>
             </div>
@@ -214,6 +225,10 @@
                 document.getElementById('filmImdb').textContent = `⭐ ${film.imdb || '-'}`;
                 document.getElementById('filmCategory').textContent = `📁 ${film.category || 'Genel'}`;
                 document.getElementById('filmDescription').textContent = film.description || 'Açıklama bulunmuyor.';
+
+                if (film.actors) {
+                    document.getElementById('filmActors').innerHTML = `<strong>Oyuncular:</strong> ${film.actors}`;
+                }
 
                 if (film.poster) {
                     document.getElementById('filmPoster').innerHTML = `<img src="${film.poster}" alt="${film.title}">`;

@@ -161,7 +161,7 @@ app.post('/api/films', (req, res) => {
         return res.status(401).json({ error: 'Yetkisiz erisim' });
     }
 
-    const { title, originalTitle, embedUrl, poster, category, year, imdb, description } = req.body;
+    const { title, originalTitle, embedUrl, poster, category, year, imdb, description, actors } = req.body;
 
     if (!title || !embedUrl) {
         return res.status(400).json({ error: 'Film adi ve embed linki zorunludur' });
@@ -176,6 +176,7 @@ app.post('/api/films', (req, res) => {
         category: category || 'Genel',
         year: year || '',
         imdb: imdb || '',
+        actors: actors || '',
         description: description || '',
         createdAt: new Date().toISOString()
     };
@@ -197,7 +198,7 @@ app.put('/api/films/:id', (req, res) => {
         return res.status(404).json({ error: 'Film bulunamadi' });
     }
 
-    const { title, originalTitle, embedUrl, poster, category, year, imdb, description } = req.body;
+    const { title, originalTitle, embedUrl, poster, category, year, imdb, description, actors } = req.body;
 
     films[index] = {
         ...films[index],
@@ -208,6 +209,7 @@ app.put('/api/films/:id', (req, res) => {
         category: category || films[index].category,
         year: year || films[index].year,
         imdb: imdb || films[index].imdb,
+        actors: actors || films[index].actors,
         description: description || films[index].description,
         updatedAt: new Date().toISOString()
     };
@@ -272,6 +274,7 @@ app.post('/api/films/bulk', (req, res) => {
             category: film.category || 'Genel',
             year: film.year || '',
             imdb: film.imdb || '',
+            actors: film.actors || '',
             description: film.description || '',
             createdAt: new Date().toISOString()
         });

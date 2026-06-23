@@ -373,6 +373,10 @@
                             <label>IMDB Puanı</label>
                             <input type="text" id="filmImdb" placeholder="Örn: 8.5">
                         </div>
+                        <div class="form-group">
+                            <label>Oyuncular</label>
+                            <input type="text" id="filmActors" placeholder="Örn: Tom Hardy, Anne Hathaway">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Açıklama</label>
@@ -545,6 +549,7 @@
                 category: document.getElementById('filmCategory').value,
                 year: document.getElementById('filmYear').value,
                 imdb: document.getElementById('filmImdb').value,
+                actors: document.getElementById('filmActors').value,
                 description: document.getElementById('filmDescription').value,
             };
 
@@ -599,6 +604,7 @@
                 document.getElementById('filmCategory').value = film.category || 'Genel';
                 document.getElementById('filmYear').value = film.year || '';
                 document.getElementById('filmImdb').value = film.imdb || '';
+                document.getElementById('filmActors').value = film.actors || '';
                 document.getElementById('filmDescription').value = film.description || '';
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -635,6 +641,7 @@
             document.getElementById('filmCategory').value = 'Aksiyon';
             document.getElementById('filmYear').value = '';
             document.getElementById('filmImdb').value = '';
+            document.getElementById('filmActors').value = '';
             document.getElementById('filmDescription').value = '';
         }
 
@@ -654,21 +661,43 @@
         }
 
         async function searchTMDB(title) {
+            const TMDB_KEY = '69a87754059ce146a5d322ae235a1702';
+            const result = { originalTitle: '', year: '', poster: '', description: '', actors: '', imdb: '' };
+
             try {
-                const TMDB_KEY = '69a87754059ce146a5d322ae235a1702';
                 const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`);
                 const data = await res.json();
-                if (data.results && data.results[0]) {
-                    const m = data.results[0];
-                    return {
-                        originalTitle: m.original_title || '',
-                        year: (m.release_date || '').substring(0, 4),
-                        poster: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '',
-                        description: m.overview || ''
-                    };
+                if (!data.results || !data.results[0]) return result;
+
+                const m = data.results[0];
+                result.originalTitle = m.original_title || '';
+                result.year = (m.release_date || '').substring(0, 4);
+                result.description = m.overview || '';
+                result.poster = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
+                result.imdb = m.vote_average ? m.vote_average.toFixed(1) : '';
+
+                try {
+                    const creditsRes = await fetch(`https://api.themoviedb.org/3/movie/${m.id}/credits?api_key=${TMDB_KEY}&language=tr-TR`);
+                    const credits = await creditsRes.json();
+                    if (credits.cast) {
+                        result.actors = credits.cast.slice(0, 5).map(a => a.name).join(', ');
+                    }
+                } catch (e) {}
+
+                if (!result.poster) {
+                    try {
+                        const imgRes = await fetch(`https://www.google.com/search?q=${encodeURIComponent(title + ' film afiş poster')}&tbm=isch&tbs=isz:m`, {
+                            headers: { 'User-Agent': 'Mozilla/5.0' }
+                        });
+                        const html = await imgRes.text();
+                        const match = html.match(/https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)/i);
+                        if (match) result.poster = match[0];
+                    } catch (e) {}
                 }
+
+                return result;
             } catch (e) {}
-            return { originalTitle: '', year: '', poster: '', description: '' };
+            return result;
         }
 
         async function bulkAddFilms() {
@@ -726,7 +755,8 @@
                             poster: tmdb.poster,
                             category,
                             year: tmdb.year,
-                            imdb: '',
+                            imdb: tmdb.imdb,
+                            actors: tmdb.actors,
                             description: tmdb.description
                         })
                     });
