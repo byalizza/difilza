@@ -79,70 +79,20 @@
             color: #666; font-size: 18px;
         }
 
-        #musicPlayer {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            border-radius: 50px;
-            padding: 6px 14px 6px 12px;
-            box-shadow: 0 4px 20px rgba(108,92,231,0.4);
-        }
-        #musicPlayer:hover { opacity: 0.9; }
-        #musicPlayer .music-icon { font-size: 16px; color: #fff; }
-
-        #musicPlayer .song-name {
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            max-width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        #musicPlayer .music-btn {
-            background: rgba(255,255,255,0.25);
-            border: none;
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        #musicPlayer .music-btn:hover { background: rgba(255,255,255,0.4); }
-
-        #musicPlayer .volume-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
-        }
-        #musicPlayer .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #6c5ce7;
-            border-radius: 50%;
-            cursor: pointer;
+        #bgAudio {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            height: 40px;
+            z-index: 9999;
         }
 
         @media (max-width: 768px) {
             .film-details { grid-template-columns: 1fr; gap: 20px; }
             .film-poster { max-width: 200px; }
             .film-info h1 { font-size: 24px; }
-            #musicPlayer .song-name { display: none; }
-            #musicPlayer .volume-slider { width: 50px; }
+            #bgAudio { width: 200px; }
         }
     </style>
 </head>
@@ -155,13 +105,6 @@
             <nav>
                 <a href="index.html">Ana Sayfa</a>
             </nav>
-            <div id="musicPlayer">
-                <span class="music-icon" id="musicIcon">♪</span>
-                <span class="song-name">Madrigal - Seni Dert Etmeler</span>
-                <button class="music-btn" id="playPauseBtn" onclick="toggleMusic()">▶</button>
-                <button class="music-btn" onclick="toggleMute()" id="muteBtn">🔊</button>
-                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="30" oninput="changeVolume(this.value)">
-            </div>
         </div>
     </header>
 
@@ -198,140 +141,56 @@
         </div>
     </footer>
 
-    <audio id="bgAudio" loop preload="auto"></audio>
+    <audio id="bgAudio" src="bgmusic.mp3" autoplay loop controls></audio>
 
     <script>
         const API_URL = 'https://difilza.onrender.com';
-        const audio = document.getElementById('bgAudio');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const musicIcon = document.getElementById('musicIcon');
-        const muteBtn = document.getElementById('muteBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
 
+        const audio = document.getElementById('bgAudio');
         const MUSIC_KEY = 'difilza_music_position';
         const MUSIC_VOL_KEY = 'difilza_music_volume';
-        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
-
-        audio.src = 'bgmusic.mp3';
-        audio.volume = 0.3;
-
-        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
-        if (savedVol !== null) {
-            audio.volume = parseFloat(savedVol);
-            volumeSlider.value = Math.round(audio.volume * 100);
-            updateMuteIcon();
-        }
 
         const savedPos = localStorage.getItem(MUSIC_KEY);
-        if (savedPos) {
-            audio.currentTime = parseFloat(savedPos);
-        }
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
 
-        let firstPlay = true;
-        function tryAutoPlay() {
-            if (firstPlay && audio.paused) {
-                audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
-                firstPlay = false;
-            }
-        }
-
-        const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
-        if (wasPlaying === 'true') {
-            audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
-            firstPlay = false;
-        }
-
-        document.addEventListener('click', tryAutoPlay, { once: false });
-        document.addEventListener('keydown', tryAutoPlay, { once: false });
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
 
         audio.addEventListener('timeupdate', () => {
             localStorage.setItem(MUSIC_KEY, audio.currentTime);
         });
-
-        audio.addEventListener('play', () => {
-            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
-            updateUI(true);
-        });
-
-        audio.addEventListener('pause', () => {
-            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
-            updateUI(false);
-        });
-
-        function toggleMusic() {
-            if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
-            }
-        }
-
-        function toggleMute() {
-            audio.muted = !audio.muted;
-            updateMuteIcon();
-        }
-
-        function changeVolume(val) {
-            audio.volume = val / 100;
-            audio.muted = false;
+        audio.addEventListener('volumechange', () => {
             localStorage.setItem(MUSIC_VOL_KEY, audio.volume);
-            updateMuteIcon();
-        }
-
-        function updateMuteIcon() {
-            if (audio.muted || audio.volume === 0) {
-                muteBtn.textContent = '🔇';
-            } else if (audio.volume < 0.5) {
-                muteBtn.textContent = '🔉';
-            } else {
-                muteBtn.textContent = '🔊';
-            }
-        }
-
-        function updateUI(playing) {
-            playPauseBtn.textContent = playing ? '⏸' : '▶';
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                audio.pause();
-            } else if (wasPlaying === 'true' || localStorage.getItem(MUSIC_PLAYING_KEY) === 'true') {
-                audio.play().catch(() => {});
-            }
         });
+
+        document.addEventListener('click', () => {
+            if (audio.paused) audio.play().catch(() => {});
+        }, { once: true });
 
         async function loadFilm() {
             const params = new URLSearchParams(window.location.search);
             const filmId = params.get('id');
-
             if (!filmId) {
                 document.getElementById('player').innerHTML = '<div class="loading-player">Film ID bulunamadı</div>';
                 return;
             }
-
             try {
                 const response = await fetch(`${API_URL}/api/films/${filmId}`);
                 const film = await response.json();
-
                 document.title = `${film.title} - DİFİLZA`;
-
                 document.getElementById('filmTitle').textContent = film.title;
                 document.getElementById('originalTitle').textContent = film.originalTitle || '';
                 document.getElementById('filmYear').textContent = `📅 ${film.year || '-'}`;
                 document.getElementById('filmImdb').textContent = `⭐ ${film.imdb || '-'}`;
                 document.getElementById('filmCategory').textContent = `📁 ${film.category || 'Genel'}`;
                 document.getElementById('filmDescription').textContent = film.description || 'Açıklama bulunmuyor.';
-
                 if (film.actors) {
                     document.getElementById('filmActors').innerHTML = `<strong>Oyuncular:</strong> ${film.actors}`;
                 }
-
                 if (film.poster) {
                     document.getElementById('filmPoster').innerHTML = `<img src="${film.poster}" alt="${film.title}">`;
                 }
-
                 document.getElementById('player').innerHTML = `<iframe src="${film.embedUrl}" allowfullscreen allow="autoplay; fullscreen" frameborder="0"></iframe>`;
-
             } catch (error) {
                 document.getElementById('player').innerHTML = '<div class="loading-player">Film yüklenirken hata oluştu</div>';
             }
