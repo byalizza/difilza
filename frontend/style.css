@@ -342,3 +342,34 @@ footer {
         flex-direction: column;
     }
 }
+
+#musicToggle {
+    background: none;
+    border: 2px solid rgba(255,255,255,0.15);
+    color: #888;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+#musicToggle:hover {
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+}
+#musicToggle.active {
+    border-color: #6c5ce7;
+    color: #6c5ce7;
+    box-shadow: 0 0 15px rgba(108,92,231,0.3);
+    animation: musicPulse 2s infinite;
+}
+@keyframes musicPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(108,92,231,0.3); }
+    50% { box-shadow: 0 0 25px rgba(108,92,231,0.6); }
+}
+#bgAudio { display: none; }

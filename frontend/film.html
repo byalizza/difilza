@@ -10,20 +10,6 @@
     <style>
         .film-page { padding-top: 20px; }
 
-        #bgAudio {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            z-index: 9999;
-            width: 320px;
-            height: 44px;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 768px) {
-            #bgAudio { width: 220px; height: 40px; }
-        }
-
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -93,11 +79,36 @@
             color: #666; font-size: 18px;
         }
 
-        @media (max-width: 768px) {
-            .film-details { grid-template-columns: 1fr; gap: 20px; }
-            .film-poster { max-width: 200px; }
-            .film-info h1 { font-size: 24px; }
+        #musicToggle {
+            background: none;
+            border: 2px solid rgba(255,255,255,0.15);
+            color: #888;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
         }
+        #musicToggle:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        #musicToggle.active {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+            box-shadow: 0 0 15px rgba(108,92,231,0.3);
+            animation: musicPulse 2s infinite;
+        }
+        @keyframes musicPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(108,92,231,0.3); }
+            50% { box-shadow: 0 0 25px rgba(108,92,231,0.6); }
+        }
+        #bgAudio { display: none; }
     </style>
 </head>
 <body>
@@ -109,6 +120,7 @@
             <nav>
                 <a href="index.html">Ana Sayfa</a>
             </nav>
+            <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
         </div>
     </header>
 
@@ -145,31 +157,51 @@
         </div>
     </footer>
 
-    <audio id="bgAudio" src="bgmusic.mp3" autoplay loop controls></audio>
+    <audio id="bgAudio" src="bgmusic.mp3" loop preload="auto"></audio>
 
     <script>
         const API_URL = 'https://difilza.onrender.com';
-
         const audio = document.getElementById('bgAudio');
+        const toggleBtn = document.getElementById('musicToggle');
         const MUSIC_KEY = 'difilza_music_position';
         const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
+
+        let isPlaying = false;
 
         const savedPos = localStorage.getItem(MUSIC_KEY);
         if (savedPos) audio.currentTime = parseFloat(savedPos);
-
         const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
         if (savedVol !== null) audio.volume = parseFloat(savedVol);
 
         audio.addEventListener('timeupdate', () => {
             localStorage.setItem(MUSIC_KEY, audio.currentTime);
         });
-        audio.addEventListener('volumechange', () => {
-            localStorage.setItem(MUSIC_VOL_KEY, audio.volume);
+
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            toggleBtn.classList.add('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
+        });
+        audio.addEventListener('pause', () => {
+            isPlaying = false;
+            toggleBtn.classList.remove('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
         });
 
-        document.addEventListener('click', () => {
-            if (audio.paused) audio.play().catch(() => {});
-        }, { once: true });
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play().catch(() => {});
+            } else {
+                audio.pause();
+            }
+        }
+
+        localStorage.setItem('difilza_on_film', 'true');
+
+        window.addEventListener('beforeunload', () => {
+            audio.pause();
+        });
 
         async function loadFilm() {
             const params = new URLSearchParams(window.location.search);
