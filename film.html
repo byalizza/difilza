@@ -8,9 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .film-page {
-            padding-top: 20px;
-        }
+        .film-page { padding-top: 20px; }
 
         .back-btn {
             display: inline-flex;
@@ -22,10 +20,7 @@
             margin-bottom: 20px;
             transition: color 0.3s;
         }
-
-        .back-btn:hover {
-            color: #6c5ce7;
-        }
+        .back-btn:hover { color: #6c5ce7; }
 
         .player-container {
             width: 100%;
@@ -35,7 +30,6 @@
             overflow: hidden;
             margin-bottom: 30px;
         }
-
         .player-container iframe {
             width: 100%;
             height: 100%;
@@ -56,93 +50,114 @@
             overflow: hidden;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
         }
-
-        .film-poster img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
+        .film-poster img { width: 100%; height: 100%; object-fit: cover; }
         .film-poster .no-poster {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            color: #333;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px; color: #333;
         }
 
-        .film-info h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
+        .film-info h1 { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+        .film-info .original-title { font-size: 16px; color: #666; margin-bottom: 20px; }
 
-        .film-info .original-title {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .film-meta {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
+        .film-meta { display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
         .film-meta span {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 16px; border-radius: 20px; font-size: 14px;
+            display: flex; align-items: center; gap: 6px;
         }
+        .film-meta .imdb { color: #f5c518; font-weight: 600; }
+        .film-meta .category { background: rgba(108,92,231,0.2); color: #a29bfe; }
 
-        .film-meta .imdb {
-            color: #f5c518;
-            font-weight: 600;
-        }
-
-        .film-meta .category {
-            background: rgba(108, 92, 231, 0.2);
-            color: #a29bfe;
-        }
-
-        .film-description {
-            color: #999;
-            line-height: 1.8;
-            font-size: 15px;
-        }
+        .film-description { color: #999; line-height: 1.8; font-size: 15px; }
+        .film-actors { color: #888; font-size: 14px; margin-bottom: 15px; }
+        .film-actors strong { color: #aaa; }
 
         .loading-player {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 12px;
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #666; font-size: 18px;
+        }
+
+        #musicPlayer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15,15,26,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            transition: transform 0.3s;
+        }
+        #musicPlayer.hidden { transform: translateY(100%); }
+
+        #musicPlayer .music-icon {
+            font-size: 20px;
+            animation: none;
+        }
+        #musicPlayer .music-icon.playing {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #musicPlayer .song-name {
+            color: #ccc;
+            font-size: 13px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #musicPlayer .music-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
-            font-size: 18px;
+            transition: all 0.3s;
+        }
+        #musicPlayer .music-btn:hover { background: #6c5ce7; }
+
+        #musicPlayer .volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        #musicPlayer .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #6c5ce7;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
         @media (max-width: 768px) {
-            .film-details {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .film-poster {
-                max-width: 200px;
-            }
-
-            .film-info h1 {
-                font-size: 24px;
-            }
+            .film-details { grid-template-columns: 1fr; gap: 20px; }
+            .film-poster { max-width: 200px; }
+            .film-info h1 { font-size: 24px; }
+            #musicPlayer .song-name { max-width: 100px; }
         }
     </style>
 </head>
@@ -178,6 +193,7 @@
                         <span class="imdb" id="filmImdb">⭐ -</span>
                         <span class="category" id="filmCategory">📁 -</span>
                     </div>
+                    <div class="film-actors" id="filmActors"></div>
                     <p class="film-description" id="filmDescription"></p>
                 </div>
             </div>
@@ -190,8 +206,108 @@
         </div>
     </footer>
 
+    <div id="musicPlayer">
+        <span class="music-icon" id="musicIcon">🎵</span>
+        <span class="song-name">Madrigal - Seni Dert Etmeler</span>
+        <button class="music-btn" id="playPauseBtn" onclick="toggleMusic()">▶</button>
+        <button class="music-btn" onclick="toggleMute()" id="muteBtn">🔊</button>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="30" oninput="changeVolume(this.value)">
+    </div>
+
+    <audio id="bgAudio" loop preload="auto"></audio>
+
     <script>
         const API_URL = 'https://difilza.onrender.com';
+        const audio = document.getElementById('bgAudio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const musicIcon = document.getElementById('musicIcon');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        const MUSIC_KEY = 'difilza_music_position';
+        const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
+
+        audio.src = 'bgmusic.mp3';
+        audio.volume = 0.3;
+
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) {
+            audio.volume = parseFloat(savedVol);
+            volumeSlider.value = Math.round(audio.volume * 100);
+            updateMuteIcon();
+        }
+
+        const savedPos = localStorage.getItem(MUSIC_KEY);
+        if (savedPos) {
+            audio.currentTime = parseFloat(savedPos);
+        }
+
+        const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
+        if (wasPlaying === 'true') {
+            audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            localStorage.setItem(MUSIC_KEY, audio.currentTime);
+        });
+
+        audio.addEventListener('play', () => {
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
+            updateUI(true);
+        });
+
+        audio.addEventListener('pause', () => {
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
+            updateUI(false);
+        });
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+
+        function toggleMute() {
+            audio.muted = !audio.muted;
+            updateMuteIcon();
+        }
+
+        function changeVolume(val) {
+            audio.volume = val / 100;
+            audio.muted = false;
+            localStorage.setItem(MUSIC_VOL_KEY, audio.volume);
+            updateMuteIcon();
+        }
+
+        function updateMuteIcon() {
+            if (audio.muted || audio.volume === 0) {
+                muteBtn.textContent = '🔇';
+            } else if (audio.volume < 0.5) {
+                muteBtn.textContent = '🔉';
+            } else {
+                muteBtn.textContent = '🔊';
+            }
+        }
+
+        function updateUI(playing) {
+            playPauseBtn.textContent = playing ? '⏸' : '▶';
+            if (playing) {
+                musicIcon.classList.add('playing');
+            } else {
+                musicIcon.classList.remove('playing');
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                audio.pause();
+            } else if (wasPlaying === 'true' || localStorage.getItem(MUSIC_PLAYING_KEY) === 'true') {
+                audio.play().catch(() => {});
+            }
+        });
 
         async function loadFilm() {
             const params = new URLSearchParams(window.location.search);
@@ -214,6 +330,10 @@
                 document.getElementById('filmImdb').textContent = `⭐ ${film.imdb || '-'}`;
                 document.getElementById('filmCategory').textContent = `📁 ${film.category || 'Genel'}`;
                 document.getElementById('filmDescription').textContent = film.description || 'Açıklama bulunmuyor.';
+
+                if (film.actors) {
+                    document.getElementById('filmActors').innerHTML = `<strong>Oyuncular:</strong> ${film.actors}`;
+                }
 
                 if (film.poster) {
                     document.getElementById('filmPoster').innerHTML = `<img src="${film.poster}" alt="${film.title}">`;
