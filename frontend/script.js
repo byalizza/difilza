@@ -1,4 +1,4 @@
-const API_URL = 'https://difilza-backend.onrender.com';
+const API_URL = 'https://difilza.onrender.com';
 
 let currentPage = 1;
 let currentCategory = '';
