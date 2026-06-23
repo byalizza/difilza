@@ -339,7 +339,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Film Adı (Türkçe)</label>
-                            <input type="text" id="filmTitle" placeholder="Örn: Batman Başlangıç">
+                            <input type="text" id="filmTitle" placeholder="Örn: Batman Başlangıç" onchange="autoFillFromTitle()">
                         </div>
                         <div class="form-group">
                             <label>Orijinal Ad</label>
@@ -356,6 +356,10 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
+                            <label>Yıl</label>
+                            <input type="text" id="filmYear" placeholder="Örn: 2024">
+                        </div>
+                        <div class="form-group" id="filmCategoryGroup" style="display:none">
                             <label>Kategori</label>
                             <select id="filmCategory">
                                 <option value="Aksiyon">Aksiyon</option>
@@ -370,12 +374,13 @@
                                 <option value="Suç">Suç</option>
                                 <option value="Fantastik">Fantastik</option>
                                 <option value="Savaş">Savaş</option>
+                                <option value="Belgesel">Belgesel</option>
+                                <option value="Aile">Aile</option>
+                                <option value="Tarih">Tarih</option>
+                                <option value="Müzik">Müzik</option>
+                                <option value="Gizem">Gizem</option>
                                 <option value="Genel">Genel</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Yıl</label>
-                            <input type="text" id="filmYear" placeholder="Örn: 2024">
                         </div>
                     </div>
                     <div class="form-row">
@@ -404,26 +409,6 @@
                     <div class="form-group">
                         <textarea id="bulkInput" placeholder="https://www.fullhdfilmizlesene.life/film/batman/ -> https://rapidvid.net/vod/xxx&#10;https://www.fullhdfilmizlesene.life/film/superman/ -> https://rapidvid.net/vod/yyy" style="min-height:200px;font-family:monospace;font-size:12px"></textarea>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Kategori</label>
-                            <select id="bulkCategory">
-                                <option value="Animasyon">Animasyon</option>
-                                <option value="Aksiyon">Aksiyon</option>
-                                <option value="Komedi">Komedi</option>
-                                <option value="Korku">Korku</option>
-                                <option value="Bilim Kurgu">Bilim Kurgu</option>
-                                <option value="Dram">Dram</option>
-                                <option value="Romantik">Romantik</option>
-                                <option value="Macera">Macera</option>
-                                <option value="Gerilim">Gerilim</option>
-                                <option value="Suç">Suç</option>
-                                <option value="Fantastik">Fantastik</option>
-                                <option value="Savaş">Savaş</option>
-                                <option value="Genel">Genel</option>
-                            </select>
-                        </div>
-                    </div>
                     <div id="bulkProgress" style="display:none;margin-bottom:15px">
                         <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px">
                             <div id="bulkStatus" style="margin-bottom:10px;font-size:14px"></div>
@@ -446,6 +431,7 @@
                     </div>
                     <div class="film-count" id="filmCount"></div>
                     <div class="btn-group" style="margin-bottom: 10px;">
+                        <button class="btn btn-primary" onclick="recategorizeAll()" id="recatBtn" style="font-size:12px">TMDB'ye Göre Kategorilendir</button>
                         <button class="btn btn-danger-outline" onclick="deleteLatestFilms()" id="deleteLatestBtn" style="font-size:12px">Son Eklenenleri Sil</button>
                         <button class="btn btn-danger" onclick="deleteAllFilms()" id="deleteAllBtn" style="font-size:12px">Tümünü Sil</button>
                     </div>
@@ -568,6 +554,8 @@
                 description: document.getElementById('filmDescription').value,
             };
 
+            if (!editId && !data.category) data.category = 'Genel';
+
             if (!data.title || !data.embedUrl) {
                 showStatus('Film adı ve embed linki zorunludur!', 'error');
                 return;
@@ -617,6 +605,7 @@
                 document.getElementById('embedUrl').value = film.embedUrl;
                 document.getElementById('posterUrl').value = film.poster || '';
                 document.getElementById('filmCategory').value = film.category || 'Genel';
+                document.getElementById('filmCategoryGroup').style.display = 'block';
                 document.getElementById('filmYear').value = film.year || '';
                 document.getElementById('filmImdb').value = film.imdb || '';
                 document.getElementById('filmActors').value = film.actors || '';
@@ -651,11 +640,26 @@
             document.getElementById('originalTitle').value = '';
             document.getElementById('embedUrl').value = '';
             document.getElementById('posterUrl').value = '';
-            document.getElementById('filmCategory').value = 'Aksiyon';
             document.getElementById('filmYear').value = '';
             document.getElementById('filmImdb').value = '';
             document.getElementById('filmActors').value = '';
             document.getElementById('filmDescription').value = '';
+            document.getElementById('filmCategoryGroup').style.display = 'none';
+        }
+
+        async function autoFillFromTitle() {
+            const title = document.getElementById('filmTitle').value.trim();
+            if (!title || document.getElementById('editFilmId').value) return;
+            const tmdb = await searchTMDB(title);
+            if (tmdb.originalTitle) document.getElementById('originalTitle').value = tmdb.originalTitle;
+            if (tmdb.year) document.getElementById('filmYear').value = tmdb.year;
+            if (tmdb.imdb) document.getElementById('filmImdb').value = tmdb.imdb;
+            if (tmdb.actors) document.getElementById('filmActors').value = tmdb.actors;
+            if (tmdb.description) document.getElementById('filmDescription').value = tmdb.description;
+            if (tmdb.poster) document.getElementById('posterUrl').value = tmdb.poster;
+            if (tmdb.category) {
+                document.getElementById('filmCategory').value = tmdb.category;
+            }
         }
 
         function extractTitle(url) {
@@ -673,9 +677,25 @@
             }
         }
 
+        const TMDB_GENRE_MAP = {
+            28: 'Aksiyon', 12: 'Macera', 16: 'Animasyon', 35: 'Komedi',
+            80: 'Suç', 99: 'Belgesel', 18: 'Dram', 10751: 'Aile',
+            14: 'Fantastik', 36: 'Tarih', 27: 'Korku', 10402: 'Müzik',
+            9648: 'Gerilim', 10749: 'Romantik', 878: 'Bilim Kurgu',
+            53: 'Gerilim', 10752: 'Savaş', 37: 'Macera'
+        };
+
+        function tmdbGenreToCategory(genreIds) {
+            if (!genreIds || !genreIds.length) return 'Genel';
+            for (const id of genreIds) {
+                if (TMDB_GENRE_MAP[id]) return TMDB_GENRE_MAP[id];
+            }
+            return 'Genel';
+        }
+
         async function searchTMDB(title) {
             const TMDB_KEY = '69a87754059ce146a5d322ae235a1702';
-            const result = { originalTitle: '', year: '', poster: '', description: '', actors: '', imdb: '' };
+            const result = { originalTitle: '', year: '', poster: '', description: '', actors: '', imdb: '', category: '' };
 
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`);
@@ -688,6 +708,15 @@
                 result.description = m.overview || '';
                 result.poster = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
                 result.imdb = m.vote_average ? m.vote_average.toFixed(1) : '';
+                result.category = tmdbGenreToCategory(m.genre_ids);
+
+                try {
+                    const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.id}?api_key=${TMDB_KEY}&language=tr-TR`);
+                    const detail = await detailRes.json();
+                    if (detail.genres && detail.genres.length) {
+                        result.category = tmdbGenreToCategory(detail.genres.map(g => g.id));
+                    }
+                } catch (e) {}
 
                 try {
                     const creditsRes = await fetch(`https://api.themoviedb.org/3/movie/${m.id}/credits?api_key=${TMDB_KEY}&language=tr-TR`);
@@ -715,7 +744,6 @@
 
         async function bulkAddFilms() {
             const input = document.getElementById('bulkInput').value.trim();
-            const category = document.getElementById('bulkCategory').value;
             if (!input) { showStatus('Metin yapıştırın!', 'error'); return; }
 
             const lines = input.split('\n').filter(l => l.includes('->') && !l.includes('BULUNAMADI'));
@@ -766,22 +794,22 @@
 
                 const tmdb = await searchTMDB(title);
 
-                try {
-                    const res = await fetch(`${API_URL}/api/films`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
-                        body: JSON.stringify({
-                            title,
-                            originalTitle: tmdb.originalTitle,
-                            embedUrl,
-                            poster: tmdb.poster,
-                            category,
-                            year: tmdb.year,
-                            imdb: tmdb.imdb,
-                            actors: tmdb.actors,
-                            description: tmdb.description
-                        })
-                    });
+                    try {
+                        const res = await fetch(`${API_URL}/api/films`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
+                            body: JSON.stringify({
+                                title,
+                                originalTitle: tmdb.originalTitle,
+                                embedUrl,
+                                poster: tmdb.poster,
+                                category: tmdb.category || 'Genel',
+                                year: tmdb.year,
+                                imdb: tmdb.imdb,
+                                actors: tmdb.actors,
+                                description: tmdb.description
+                            })
+                        });
                     if (res.ok) { added++; existingTitles.add(title.toLowerCase()); } else {
                         const err = await res.text();
                         console.error('Film ekleme hatasi:', title, res.status, err);
@@ -799,6 +827,53 @@
             cancelBtn.style.display = 'none';
             window._bulkCancelled = false;
             loadFilms();
+        }
+
+        async function recategorizeAll() {
+            if (!confirm('Tüm filmler TMDB\'ye göre yeniden kategorilendirilecek. Emin misin?')) return;
+
+            const btn = document.getElementById('recatBtn');
+            btn.disabled = true;
+            btn.textContent = 'Kategorilendiriliyor...';
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+
+                let updated = 0, failed = 0;
+                for (let i = 0; i < films.length; i++) {
+                    const f = films[i];
+                    const tmdb = await searchTMDB(f.title);
+                    if (tmdb.category && tmdb.category !== f.category) {
+                        const updateRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
+                            body: JSON.stringify({
+                                title: f.title,
+                                originalTitle: f.originalTitle || tmdb.originalTitle,
+                                embedUrl: f.embedUrl,
+                                poster: f.poster || tmdb.poster,
+                                category: tmdb.category,
+                                year: f.year || tmdb.year,
+                                imdb: f.imdb || tmdb.imdb,
+                                actors: f.actors || tmdb.actors,
+                                description: f.description || tmdb.description
+                            })
+                        });
+                        if (updateRes.ok) updated++;
+                        else failed++;
+                    }
+                }
+
+                showStatus(`${updated} film kategorilendirildi, ${failed} başarısız`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'TMDB\'ye Göre Kategorilendir';
         }
 
         function cancelBulkAdd() {
