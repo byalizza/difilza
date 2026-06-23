@@ -104,20 +104,21 @@
             if (onFilm === 'true') {
                 localStorage.setItem('difilza_on_film', 'false');
                 audio.play().catch(() => {});
-            } else {
-                const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
-                if (wasPlaying === 'true') audio.play().catch(() => {});
+                return;
             }
+            const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
+            if (wasPlaying === 'true') audio.play().catch(() => {});
         }
 
         window.addEventListener('pageshow', tryResume);
         tryResume();
 
-        document.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+            if (e.target === toggleBtn || toggleBtn.contains(e.target)) return;
             if (audio.paused) {
                 audio.play().catch(() => {});
             }
-        });
+        }, { once: true });
 
         window.addEventListener('beforeunload', () => {
             audio.pause();
