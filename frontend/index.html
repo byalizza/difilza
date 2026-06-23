@@ -58,6 +58,20 @@
         </div>
     </footer>
 
+    <audio id="bgAudio" src="bgmusic.mp3" autoplay loop controls style="position:fixed;bottom:10px;right:10px;z-index:9999;width:300px;height:40px"></audio>
+
     <script src="script.js"></script>
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const MUSIC_KEY = 'difilza_music_position';
+        const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const savedPos = localStorage.getItem(MUSIC_KEY);
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
+        audio.addEventListener('timeupdate', () => { localStorage.setItem(MUSIC_KEY, audio.currentTime); });
+        audio.addEventListener('volumechange', () => { localStorage.setItem(MUSIC_VOL_KEY, audio.volume); });
+        document.addEventListener('click', () => { if (audio.paused) audio.play().catch(() => {}); }, { once: true });
+    </script>
 </body>
 </html>

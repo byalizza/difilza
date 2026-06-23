@@ -10,6 +10,20 @@
     <style>
         .film-page { padding-top: 20px; }
 
+        #bgAudio {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 9999;
+            width: 320px;
+            height: 44px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            #bgAudio { width: 220px; height: 40px; }
+        }
+
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -79,20 +93,10 @@
             color: #666; font-size: 18px;
         }
 
-        #bgAudio {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            width: 300px;
-            height: 40px;
-            z-index: 9999;
-        }
-
         @media (max-width: 768px) {
             .film-details { grid-template-columns: 1fr; gap: 20px; }
             .film-poster { max-width: 200px; }
             .film-info h1 { font-size: 24px; }
-            #bgAudio { width: 200px; }
         }
     </style>
 </head>
