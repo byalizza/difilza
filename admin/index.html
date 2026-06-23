@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DİFİLZA - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .login-box h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-box h1 span {
+            color: #6c5ce7;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 0;
+        }
+
+        .admin-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-header h1 {
+            font-size: 22px;
+        }
+
+        .admin-header h1 span {
+            color: #6c5ce7;
+        }
+
+        .admin-header .logout-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .admin-header .logout-btn:hover {
+            background: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .admin-content {
+            padding: 30px 0;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #6c5ce7;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #5a4bd1;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .films-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .films-table th,
+        .films-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .films-table th {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .films-table td {
+            font-size: 14px;
+        }
+
+        .films-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .films-table .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .films-table .actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .status-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-msg.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .status-msg.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: #6c5ce7;
+        }
+
+        .film-count {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <h1><span>D</span>İFİL<span>Z</span>A</h1>
+            <p>Admin Paneline Giriş</p>
+            <div class="form-group">
+                <label>Admin Şifresi</label>
+                <input type="password" id="loginKey" placeholder="Şifrenizi girin" onkeypress="if(event.key==='Enter')login()">
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="login()">Giriş Yap</button>
+        </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <div class="container">
+                <h1><span>D</span>İFİL<span>Z</span>A Admin</h1>
+                <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div class="container">
+                <div class="status-msg" id="statusMsg"></div>
+
+                <div class="form-section">
+                    <h2 id="formTitle">Film Ekle</h2>
+                    <input type="hidden" id="editFilmId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Film Adı (Türkçe)</label>
+                            <input type="text" id="filmTitle" placeholder="Örn: Batman Başlangıç">
+                        </div>
+                        <div class="form-group">
+                            <label>Orijinal Ad</label>
+                            <input type="text" id="originalTitle" placeholder="Örn: Batman Begins">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Embed Linki</label>
+                        <input type="text" id="embedUrl" placeholder="Örn: https://rapidvid.net/vod/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Poster URL (opsiyonel)</label>
+                        <input type="text" id="posterUrl" placeholder="Örn: https://image.tmdb.org/...">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select id="filmCategory">
+                                <option value="Aksiyon">Aksiyon</option>
+                                <option value="Komedi">Komedi</option>
+                                <option value="Korku">Korku</option>
+                                <option value="Bilim Kurgu">Bilim Kurgu</option>
+                                <option value="Dram">Dram</option>
+                                <option value="Romantik">Romantik</option>
+                                <option value="Animasyon">Animasyon</option>
+                                <option value="Macera">Macera</option>
+                                <option value="Gerilim">Gerilim</option>
+                                <option value="Suç">Suç</option>
+                                <option value="Fantastik">Fantastik</option>
+                                <option value="Savaş">Savaş</option>
+                                <option value="Genel">Genel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Yıl</label>
+                            <input type="text" id="filmYear" placeholder="Örn: 2024">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>IMDB Puanı</label>
+                            <input type="text" id="filmImdb" placeholder="Örn: 8.5">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea id="filmDescription" placeholder="Film hakkında kısa bir açıklama..."></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="saveFilm()">Kaydet</button>
+                        <button class="btn btn-secondary" onclick="resetForm()">İptal</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Filmler</h2>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Film ara..." oninput="searchFilms()">
+                    </div>
+                    <div class="film-count" id="filmCount"></div>
+                    <table class="films-table">
+                        <thead>
+                            <tr>
+                                <th>Film</th>
+                                <th>Kategori</th>
+                                <th>Yıl</th>
+                                <th>IMDB</th>
+                                <th>Tarih</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filmsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://difilza-backend.onrender.com';
+        let ADMIN_KEY = '';
+        let allFilms = [];
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            setTimeout(() => { el.className = 'status-msg'; }, 3000);
+        }
+
+        function login() {
+            const key = document.getElementById('loginKey').value;
+            if (!key) {
+                showStatus('Şifre girin!', 'error');
+                return;
+            }
+            ADMIN_KEY = key;
+            fetch(`${API_URL}/api/films?limit=1`, {
+                headers: { 'X-Admin-Key': ADMIN_KEY }
+            })
+            .then(r => {
+                if (!r.ok) throw new Error();
+                return r.json();
+            })
+            .then(() => {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadFilms();
+            })
+            .catch(() => {
+                showStatus('Yanlış şifre!', 'error');
+            });
+        }
+
+        function logout() {
+            ADMIN_KEY = '';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginKey').value = '';
+        }
+
+        async function loadFilms() {
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                allFilms = data.films;
+                renderFilmsList(allFilms);
+            } catch (e) {
+                showStatus('Filmler yüklenemedi!', 'error');
+            }
+        }
+
+        function renderFilmsList(films) {
+            document.getElementById('filmCount').textContent = `Toplam ${films.length} film`;
+            const tbody = document.getElementById('filmsList');
+
+            if (!films.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666">Film bulunamadı</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = films.map(f => `
+                <tr>
+                    <td><strong>${f.title}</strong><br><small style="color:#666">${f.originalTitle || ''}</small></td>
+                    <td>${f.category || '-'}</td>
+                    <td>${f.year || '-'}</td>
+                    <td>${f.imdb || '-'}</td>
+                    <td>${new Date(f.createdAt).toLocaleDateString('tr-TR')}</td>
+                    <td class="actions">
+                        <button class="btn btn-secondary" onclick="editFilm('${f.id}')">Düzenle</button>
+                        <button class="btn btn-danger" onclick="deleteFilm('${f.id}')">Sil</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchFilms() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allFilms.filter(f =>
+                f.title.toLowerCase().includes(q) ||
+                (f.originalTitle && f.originalTitle.toLowerCase().includes(q))
+            );
+            renderFilmsList(filtered);
+        }
+
+        async function saveFilm() {
+            const editId = document.getElementById('editFilmId').value;
+            const data = {
+                title: document.getElementById('filmTitle').value,
+                originalTitle: document.getElementById('originalTitle').value,
+                embedUrl: document.getElementById('embedUrl').value,
+                poster: document.getElementById('posterUrl').value,
+                category: document.getElementById('filmCategory').value,
+                year: document.getElementById('filmYear').value,
+                imdb: document.getElementById('filmImdb').value,
+                description: document.getElementById('filmDescription').value,
+            };
+
+            if (!data.title || !data.embedUrl) {
+                showStatus('Film adı ve embed linki zorunludur!', 'error');
+                return;
+            }
+
+            try {
+                let res;
+                if (editId) {
+                    res = await fetch(`${API_URL}/api/films/${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': ADMIN_KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    res = await fetch(`${API_URL}/api/films`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': ADMIN_KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (!res.ok) throw new Error();
+
+                showStatus(editId ? 'Film güncellendi!' : 'Film eklendi!', 'success');
+                resetForm();
+                loadFilms();
+            } catch (e) {
+                showStatus('İşlem başarısız!', 'error');
+            }
+        }
+
+        async function editFilm(id) {
+            try {
+                const res = await fetch(`${API_URL}/api/films/${id}`);
+                const film = await res.json();
+
+                document.getElementById('editFilmId').value = film.id;
+                document.getElementById('formTitle').textContent = 'Film Düzenle';
+                document.getElementById('filmTitle').value = film.title;
+                document.getElementById('originalTitle').value = film.originalTitle || '';
+                document.getElementById('embedUrl').value = film.embedUrl;
+                document.getElementById('posterUrl').value = film.poster || '';
+                document.getElementById('filmCategory').value = film.category || 'Genel';
+                document.getElementById('filmYear').value = film.year || '';
+                document.getElementById('filmImdb').value = film.imdb || '';
+                document.getElementById('filmDescription').value = film.description || '';
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {
+                showStatus('Film yüklenemedi!', 'error');
+            }
+        }
+
+        async function deleteFilm(id) {
+            if (!confirm('Bu filmi silmek istediğinize emin misiniz?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/films/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!res.ok) throw new Error();
+
+                showStatus('Film silindi!', 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Silme başarısız!', 'error');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editFilmId').value = '';
+            document.getElementById('formTitle').textContent = 'Film Ekle';
+            document.getElementById('filmTitle').value = '';
+            document.getElementById('originalTitle').value = '';
+            document.getElementById('embedUrl').value = '';
+            document.getElementById('posterUrl').value = '';
+            document.getElementById('filmCategory').value = 'Aksiyon';
+            document.getElementById('filmYear').value = '';
+            document.getElementById('filmImdb').value = '';
+            document.getElementById('filmDescription').value = '';
+        }
+    </script>
+</body>
+</html>

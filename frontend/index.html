@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DİFİLZA - Film İzle</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-d">D</span>İFİL<span class="logo-z">Z</span>A
+            </a>
+            <nav>
+                <a href="index.html" class="active">Ana Sayfa</a>
+                <a href="#" onclick="filterByCategory('Aksiyon')">Aksiyon</a>
+                <a href="#" onclick="filterByCategory('Komedi')">Komedi</a>
+                <a href="#" onclick="filterByCategory('Korku')">Korku</a>
+                <a href="#" onclick="filterByCategory('Bilim Kurgu')">Bilim Kurgu</a>
+                <a href="#" onclick="filterByCategory('Dram')">Dram</a>
+            </nav>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Film ara..." onkeyup="searchFilms()">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>Türkçe Dublaj & Altyazılı Filmler</h1>
+                <p>Binlerce filmi HD kalitede izle</p>
+            </div>
+
+            <div class="filter-bar">
+                <select id="categoryFilter" onchange="filterFilms()">
+                    <option value="">Tüm Kategoriler</option>
+                </select>
+                <select id="yearFilter" onchange="filterFilms()">
+                    <option value="">Tüm Yıllar</option>
+                </select>
+            </div>
+
+            <div class="films-grid" id="filmsGrid">
+                <div class="loading">Filmler yükleniyor...</div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 DİFİLZA. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
