@@ -212,6 +212,16 @@
             color: #fff;
         }
 
+        .btn-danger-outline {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger-outline:hover {
+            background: rgba(231, 76, 60, 0.1);
+        }
+
         .films-table {
             width: 100%;
             border-collapse: collapse;
@@ -424,6 +434,7 @@
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-primary" onclick="bulkAddFilms()" id="bulkBtn">Toplu Ekle</button>
+                        <button class="btn btn-danger" onclick="cancelBulkAdd()" id="cancelBulkBtn" style="display:none">İptal</button>
                         <button class="btn btn-secondary" onclick="document.getElementById('bulkInput').value=''">Temizle</button>
                     </div>
                 </div>
@@ -434,6 +445,10 @@
                         <input type="text" id="searchInput" placeholder="Film ara..." oninput="searchFilms()">
                     </div>
                     <div class="film-count" id="filmCount"></div>
+                    <div class="btn-group" style="margin-bottom: 10px;">
+                        <button class="btn btn-danger-outline" onclick="deleteLatestFilms()" id="deleteLatestBtn" style="font-size:12px">Son Eklenenleri Sil</button>
+                        <button class="btn btn-danger" onclick="deleteAllFilms()" id="deleteAllBtn" style="font-size:12px">Tümünü Sil</button>
+                    </div>
                     <table class="films-table">
                         <thead>
                             <tr>
@@ -715,6 +730,10 @@
             btn.textContent = 'Ekleniyor...';
 
             let added = 0, skipped = 0, failed = 0;
+            window._bulkCancelled = false;
+
+            const cancelBtn = document.getElementById('cancelBulkBtn');
+            cancelBtn.style.display = 'inline-block';
 
             const existingRes = await fetch(`${API_URL}/api/films?limit=1000`);
             const existingData = await existingRes.json();
@@ -728,6 +747,11 @@
 
                 status.textContent = `[${i+1}/${lines.length}] ${title} ekleniyor...`;
                 bar.style.width = `${((i+1)/lines.length)*100}%`;
+
+                if (window._bulkCancelled) {
+                    status.textContent = 'İptal edildi!';
+                    break;
+                }
 
                 if (existingTitles.has(title.toLowerCase())) {
                     skipped++;
@@ -772,7 +796,83 @@
             status.textContent = `Tamamlandı! ${added} eklendi, ${skipped} atlandı (mevcut), ${failed} başarısız`;
             btn.disabled = false;
             btn.textContent = 'Toplu Ekle';
+            cancelBtn.style.display = 'none';
+            window._bulkCancelled = false;
             loadFilms();
+        }
+
+        function cancelBulkAdd() {
+            window._bulkCancelled = true;
+            document.getElementById('cancelBulkBtn').style.display = 'none';
+            document.getElementById('bulkStatus').textContent = 'İptal ediliyor...';
+        }
+
+        async function deleteLatestFilms() {
+            const count = prompt('Kaç film silinsin? (en son eklenenlerden)', '5');
+            if (!count || isNaN(count) || parseInt(count) < 1) return;
+
+            if (!confirm(`Son ${count} film silinecek. Emin misin?`)) return;
+
+            const btn = document.getElementById('deleteLatestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Siliniyor...';
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+                const toDelete = films.slice(-parseInt(count));
+
+                let deleted = 0;
+                for (const f of toDelete) {
+                    const delRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-Admin-Key': ADMIN_KEY }
+                    });
+                    if (delRes.ok) deleted++;
+                }
+
+                showStatus(`${deleted} film silindi!`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Son Eklenenleri Sil';
+        }
+
+        async function deleteAllFilms() {
+            if (!confirm('TÜM filmler silinecek! Emin misin?')) return;
+            const confirm2 = prompt('Onaylamak için "SİL" yazın');
+            if (confirm2 !== 'SİL') return;
+
+            const btn = document.getElementById('deleteAllBtn');
+            btn.disabled = true;
+            btn.textContent = 'Tümü siliniyor...';
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+
+                let deleted = 0;
+                for (const f of films) {
+                    const delRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-Admin-Key': ADMIN_KEY }
+                    });
+                    if (delRes.ok) deleted++;
+                }
+
+                showStatus(`${deleted} film silindi!`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Tümünü Sil';
         }
     </script>
 </body>
