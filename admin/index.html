@@ -639,8 +639,18 @@
         }
 
         function extractTitle(url) {
-            const slug = url.split('/film/')[1]?.replace(/\/$/, '').replace(/-fh\d*$/i, '') || '';
-            return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            try {
+                const u = new URL(url);
+                const parts = u.pathname.split('/').filter(Boolean);
+                let slug = parts[parts.length - 1] || '';
+                slug = slug.replace(/\/$/, '');
+                if (slug.includes('/film/')) {
+                    slug = slug.split('/film/')[1] || slug;
+                }
+                return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            } catch {
+                return '';
+            }
         }
 
         async function searchTMDB(title) {
@@ -689,11 +699,17 @@
                 const embedUrl = parts[1].trim();
                 const title = extractTitle(filmUrl);
 
-                status.textContent = `[${i+1}/${lines.length}] ${title} kontrol ediliyor...`;
+                status.textContent = `[${i+1}/${lines.length}] ${title} ekleniyor...`;
                 bar.style.width = `${((i+1)/lines.length)*100}%`;
 
                 if (existingTitles.has(title.toLowerCase())) {
                     skipped++;
+                    continue;
+                }
+
+                if (!embedUrl || !embedUrl.startsWith('http')) {
+                    console.error('Gecersiz embed URL:', embedUrl);
+                    failed++;
                     continue;
                 }
 
@@ -714,8 +730,15 @@
                             description: tmdb.description
                         })
                     });
-                    if (res.ok) { added++; existingTitles.add(title.toLowerCase()); } else failed++;
-                } catch (e) { failed++; }
+                    if (res.ok) { added++; existingTitles.add(title.toLowerCase()); } else {
+                        const err = await res.text();
+                        console.error('Film ekleme hatasi:', title, res.status, err);
+                        failed++;
+                    }
+                } catch (e) {
+                    console.error('Film ekleme exception:', title, e.message);
+                    failed++;
+                }
             }
 
             status.textContent = `Tamamlandı! ${added} eklendi, ${skipped} atlandı (mevcut), ${failed} başarısız`;
