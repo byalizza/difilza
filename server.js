@@ -1,48 +1,17 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const DATA_FILE = path.join(__dirname, 'data', 'films.json');
 const ADMIN_KEY = process.env.ADMIN_KEY || 'difilza-admin-2026';
+
+let films = [];
 
 app.use(cors());
 app.use(express.json());
 
-function readFilms() {
-    const dataDir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-    if (!fs.existsSync(DATA_FILE)) {
-        fs.writeFileSync(DATA_FILE, JSON.stringify([]));
-    }
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-}
-
-function writeFilms(films) {
-    const dataDir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(films, null, 2));
-}
-
-function authMiddleware(req, res, next) {
-    const key = req.headers['x-admin-key'];
-    if (key !== ADMIN_KEY) {
-        return res.status(401).json({ error: 'Yetkisiz erisim' });
-    }
-    next();
-}
-
 app.get('/api/films', (req, res) => {
-    const films = readFilms();
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const search = req.query.search || '';
@@ -75,7 +44,6 @@ app.get('/api/films', (req, res) => {
 });
 
 app.get('/api/films/:id', (req, res) => {
-    const films = readFilms();
     const film = films.find(f => f.id === req.params.id);
     if (!film) {
         return res.status(404).json({ error: 'Film bulunamadi' });
@@ -84,7 +52,6 @@ app.get('/api/films/:id', (req, res) => {
 });
 
 app.get('/api/films/:id/embed', (req, res) => {
-    const films = readFilms();
     const film = films.find(f => f.id === req.params.id);
     if (!film) {
         return res.status(404).json({ error: 'Film bulunamadi' });
@@ -92,8 +59,12 @@ app.get('/api/films/:id/embed', (req, res) => {
     res.json({ embedUrl: film.embedUrl });
 });
 
-app.post('/api/films', authMiddleware, (req, res) => {
-    const films = readFilms();
+app.post('/api/films', (req, res) => {
+    const key = req.headers['x-admin-key'];
+    if (key !== ADMIN_KEY) {
+        return res.status(401).json({ error: 'Yetkisiz erisim' });
+    }
+
     const { title, originalTitle, embedUrl, poster, category, year, imdb, description } = req.body;
 
     if (!title || !embedUrl) {
@@ -114,13 +85,15 @@ app.post('/api/films', authMiddleware, (req, res) => {
     };
 
     films.unshift(newFilm);
-    writeFilms(films);
-
     res.status(201).json(newFilm);
 });
 
-app.put('/api/films/:id', authMiddleware, (req, res) => {
-    const films = readFilms();
+app.put('/api/films/:id', (req, res) => {
+    const key = req.headers['x-admin-key'];
+    if (key !== ADMIN_KEY) {
+        return res.status(401).json({ error: 'Yetkisiz erisim' });
+    }
+
     const index = films.findIndex(f => f.id === req.params.id);
 
     if (index === -1) {
@@ -142,12 +115,15 @@ app.put('/api/films/:id', authMiddleware, (req, res) => {
         updatedAt: new Date().toISOString()
     };
 
-    writeFilms(films);
     res.json(films[index]);
 });
 
-app.delete('/api/films/:id', authMiddleware, (req, res) => {
-    let films = readFilms();
+app.delete('/api/films/:id', (req, res) => {
+    const key = req.headers['x-admin-key'];
+    if (key !== ADMIN_KEY) {
+        return res.status(401).json({ error: 'Yetkisiz erisim' });
+    }
+
     const index = films.findIndex(f => f.id === req.params.id);
 
     if (index === -1) {
@@ -155,19 +131,16 @@ app.delete('/api/films/:id', authMiddleware, (req, res) => {
     }
 
     films.splice(index, 1);
-    writeFilms(films);
-
     res.json({ message: 'Film silindi' });
 });
 
 app.get('/api/categories', (req, res) => {
-    const films = readFilms();
     const categories = [...new Set(films.map(f => f.category))];
     res.json(categories);
 });
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Difilza API calisiyor', version: '1.0.0' });
+    res.json({ message: 'Difilza API calisiyor', version: '1.0.0', filmCount: films.length });
 });
 
 app.listen(PORT, () => {
