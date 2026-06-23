@@ -113,12 +113,15 @@
         window.addEventListener('pageshow', tryResume);
         tryResume();
 
+        let started = false;
+
         document.addEventListener('click', (e) => {
             if (e.target === toggleBtn || toggleBtn.contains(e.target)) return;
-            if (audio.paused) {
+            if (!started && audio.paused) {
+                started = true;
                 audio.play().catch(() => {});
             }
-        }, { once: true });
+        });
 
         window.addEventListener('beforeunload', () => {
             audio.pause();

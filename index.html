@@ -22,6 +22,7 @@
                 <a href="#" onclick="filterByCategory('Bilim Kurgu')">Bilim Kurgu</a>
                 <a href="#" onclick="filterByCategory('Dram')">Dram</a>
             </nav>
+            <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Film ara..." onkeyup="searchFilms()">
             </div>
@@ -58,6 +59,105 @@
         </div>
     </footer>
 
+    <audio id="bgAudio" src="bgmusic.mp3" loop preload="auto"></audio>
+
     <script src="script.js"></script>
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const toggleBtn = document.getElementById('musicToggle');
+        const MUSIC_KEY = 'difilza_music_position';
+        const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
+
+        let isPlaying = false;
+
+        const savedPos = localStorage.getItem(MUSIC_KEY);
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
+
+        audio.addEventListener('timeupdate', () => {
+            localStorage.setItem(MUSIC_KEY, audio.currentTime);
+        });
+
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            toggleBtn.classList.add('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
+        });
+        audio.addEventListener('pause', () => {
+            isPlaying = false;
+            toggleBtn.classList.remove('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
+        });
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play().catch(() => {});
+            } else {
+                audio.pause();
+            }
+        }
+
+        function tryResume() {
+            const onFilm = localStorage.getItem('difilza_on_film');
+            if (onFilm === 'true') {
+                localStorage.setItem('difilza_on_film', 'false');
+                audio.play().catch(() => {});
+                return;
+            }
+            const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
+            if (wasPlaying === 'true') audio.play().catch(() => {});
+        }
+
+        window.addEventListener('pageshow', tryResume);
+        tryResume();
+
+        let started = false;
+
+        document.addEventListener('click', (e) => {
+            if (e.target === toggleBtn || toggleBtn.contains(e.target)) return;
+            if (!started && audio.paused) {
+                started = true;
+                audio.play().catch(() => {});
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            audio.pause();
+        });
+    </script>
+    <style>
+        #musicToggle {
+            background: none;
+            border: 2px solid rgba(255,255,255,0.15);
+            color: #888;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        #musicToggle:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        #musicToggle.active {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+            box-shadow: 0 0 15px rgba(108,92,231,0.3);
+            animation: musicPulse 2s infinite;
+        }
+        @keyframes musicPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(108,92,231,0.3); }
+            50% { box-shadow: 0 0 25px rgba(108,92,231,0.6); }
+        }
+        #bgAudio { display: none; }
+    </style>
 </body>
 </html>

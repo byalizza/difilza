@@ -79,86 +79,36 @@
             color: #666; font-size: 18px;
         }
 
-        #musicPlayer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(15,15,26,0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 9999;
-            transition: transform 0.3s;
-        }
-        #musicPlayer.hidden { transform: translateY(100%); }
-
-        #musicPlayer .music-icon {
-            font-size: 20px;
-            animation: none;
-        }
-        #musicPlayer .music-icon.playing {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        #musicPlayer .song-name {
-            color: #ccc;
-            font-size: 13px;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        #musicPlayer .music-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #fff;
+        #musicToggle {
+            background: none;
+            border: 2px solid rgba(255,255,255,0.15);
+            color: #888;
             width: 36px;
             height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
-        #musicPlayer .music-btn:hover { background: #6c5ce7; }
-
-        #musicPlayer .volume-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            outline: none;
-            cursor: pointer;
+        #musicToggle:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
         }
-        #musicPlayer .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #6c5ce7;
-            border-radius: 50%;
-            cursor: pointer;
+        #musicToggle.active {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+            box-shadow: 0 0 15px rgba(108,92,231,0.3);
+            animation: musicPulse 2s infinite;
         }
-
-        @media (max-width: 768px) {
-            .film-details { grid-template-columns: 1fr; gap: 20px; }
-            .film-poster { max-width: 200px; }
-            .film-info h1 { font-size: 24px; }
-            #musicPlayer .song-name { max-width: 100px; }
+        @keyframes musicPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(108,92,231,0.3); }
+            50% { box-shadow: 0 0 25px rgba(108,92,231,0.6); }
         }
+        #bgAudio { display: none; }
     </style>
 </head>
 <body>
@@ -170,6 +120,7 @@
             <nav>
                 <a href="index.html">Ana Sayfa</a>
             </nav>
+            <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
         </div>
     </header>
 
@@ -206,153 +157,76 @@
         </div>
     </footer>
 
-    <div id="musicPlayer">
-        <span class="music-icon" id="musicIcon">🎵</span>
-        <span class="song-name">Madrigal - Seni Dert Etmeler</span>
-        <button class="music-btn" id="playPauseBtn" onclick="toggleMusic()">▶</button>
-        <button class="music-btn" onclick="toggleMute()" id="muteBtn">🔊</button>
-        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="30" oninput="changeVolume(this.value)">
-    </div>
-
-    <audio id="bgAudio" loop preload="auto"></audio>
+    <audio id="bgAudio" src="bgmusic.mp3" loop preload="auto"></audio>
 
     <script>
         const API_URL = 'https://difilza.onrender.com';
         const audio = document.getElementById('bgAudio');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const musicIcon = document.getElementById('musicIcon');
-        const muteBtn = document.getElementById('muteBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-
+        const toggleBtn = document.getElementById('musicToggle');
         const MUSIC_KEY = 'difilza_music_position';
         const MUSIC_VOL_KEY = 'difilza_music_volume';
         const MUSIC_PLAYING_KEY = 'difilza_music_playing';
 
-        audio.src = 'bgmusic.mp3';
-        audio.volume = 0.3;
-
-        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
-        if (savedVol !== null) {
-            audio.volume = parseFloat(savedVol);
-            volumeSlider.value = Math.round(audio.volume * 100);
-            updateMuteIcon();
-        }
+        let isPlaying = false;
 
         const savedPos = localStorage.getItem(MUSIC_KEY);
-        if (savedPos) {
-            audio.currentTime = parseFloat(savedPos);
-        }
-
-        let firstPlay = true;
-        function tryAutoPlay() {
-            if (firstPlay && audio.paused) {
-                audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
-                firstPlay = false;
-            }
-        }
-
-        const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
-        if (wasPlaying === 'true') {
-            audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
-            firstPlay = false;
-        }
-
-        document.addEventListener('click', tryAutoPlay, { once: false });
-        document.addEventListener('keydown', tryAutoPlay, { once: false });
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
 
         audio.addEventListener('timeupdate', () => {
             localStorage.setItem(MUSIC_KEY, audio.currentTime);
         });
 
         audio.addEventListener('play', () => {
+            isPlaying = true;
+            toggleBtn.classList.add('active');
             localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
-            updateUI(true);
         });
-
         audio.addEventListener('pause', () => {
+            isPlaying = false;
+            toggleBtn.classList.remove('active');
             localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
-            updateUI(false);
         });
 
         function toggleMusic() {
             if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
-            }
-        }
-
-        function toggleMute() {
-            audio.muted = !audio.muted;
-            updateMuteIcon();
-        }
-
-        function changeVolume(val) {
-            audio.volume = val / 100;
-            audio.muted = false;
-            localStorage.setItem(MUSIC_VOL_KEY, audio.volume);
-            updateMuteIcon();
-        }
-
-        function updateMuteIcon() {
-            if (audio.muted || audio.volume === 0) {
-                muteBtn.textContent = '🔇';
-            } else if (audio.volume < 0.5) {
-                muteBtn.textContent = '🔉';
-            } else {
-                muteBtn.textContent = '🔊';
-            }
-        }
-
-        function updateUI(playing) {
-            playPauseBtn.textContent = playing ? '⏸' : '▶';
-            if (playing) {
-                musicIcon.classList.add('playing');
-            } else {
-                musicIcon.classList.remove('playing');
-            }
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                audio.pause();
-            } else if (wasPlaying === 'true' || localStorage.getItem(MUSIC_PLAYING_KEY) === 'true') {
                 audio.play().catch(() => {});
+            } else {
+                audio.pause();
             }
+        }
+
+        localStorage.setItem('difilza_on_film', 'true');
+
+        window.addEventListener('beforeunload', () => {
+            audio.pause();
         });
 
         async function loadFilm() {
             const params = new URLSearchParams(window.location.search);
             const filmId = params.get('id');
-
             if (!filmId) {
                 document.getElementById('player').innerHTML = '<div class="loading-player">Film ID bulunamadı</div>';
                 return;
             }
-
             try {
                 const response = await fetch(`${API_URL}/api/films/${filmId}`);
                 const film = await response.json();
-
                 document.title = `${film.title} - DİFİLZA`;
-
                 document.getElementById('filmTitle').textContent = film.title;
                 document.getElementById('originalTitle').textContent = film.originalTitle || '';
                 document.getElementById('filmYear').textContent = `📅 ${film.year || '-'}`;
                 document.getElementById('filmImdb').textContent = `⭐ ${film.imdb || '-'}`;
                 document.getElementById('filmCategory').textContent = `📁 ${film.category || 'Genel'}`;
                 document.getElementById('filmDescription').textContent = film.description || 'Açıklama bulunmuyor.';
-
                 if (film.actors) {
                     document.getElementById('filmActors').innerHTML = `<strong>Oyuncular:</strong> ${film.actors}`;
                 }
-
                 if (film.poster) {
                     document.getElementById('filmPoster').innerHTML = `<img src="${film.poster}" alt="${film.title}">`;
                 }
-
                 document.getElementById('player').innerHTML = `<iframe src="${film.embedUrl}" allowfullscreen allow="autoplay; fullscreen" frameborder="0"></iframe>`;
-
             } catch (error) {
                 document.getElementById('player').innerHTML = '<div class="loading-player">Film yüklenirken hata oluştu</div>';
             }
