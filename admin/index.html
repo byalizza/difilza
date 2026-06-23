@@ -614,8 +614,6 @@
         }
 
         async function deleteFilm(id) {
-            if (!confirm('Bu filmi silmek istediğinize emin misiniz?')) return;
-
             try {
                 const res = await fetch(`${API_URL}/api/films/${id}`, {
                     method: 'DELETE',
