@@ -677,7 +677,11 @@
             btn.disabled = true;
             btn.textContent = 'Ekleniyor...';
 
-            let added = 0, failed = 0;
+            let added = 0, skipped = 0, failed = 0;
+
+            const existingRes = await fetch(`${API_URL}/api/films?limit=1000`);
+            const existingData = await existingRes.json();
+            const existingTitles = new Set(existingData.films.map(f => f.title.toLowerCase()));
 
             for (let i = 0; i < lines.length; i++) {
                 const parts = lines[i].split('->');
@@ -685,8 +689,13 @@
                 const embedUrl = parts[1].trim();
                 const title = extractTitle(filmUrl);
 
-                status.textContent = `[${i+1}/${lines.length}] ${title} ekleniyor...`;
+                status.textContent = `[${i+1}/${lines.length}] ${title} kontrol ediliyor...`;
                 bar.style.width = `${((i+1)/lines.length)*100}%`;
+
+                if (existingTitles.has(title.toLowerCase())) {
+                    skipped++;
+                    continue;
+                }
 
                 const tmdb = await searchTMDB(title);
 
@@ -705,11 +714,11 @@
                             description: tmdb.description
                         })
                     });
-                    if (res.ok) added++; else failed++;
+                    if (res.ok) { added++; existingTitles.add(title.toLowerCase()); } else failed++;
                 } catch (e) { failed++; }
             }
 
-            status.textContent = `Tamamlandı! ${added} eklendi, ${failed} başarısız`;
+            status.textContent = `Tamamlandı! ${added} eklendi, ${skipped} atlandı (mevcut), ${failed} başarısız`;
             btn.disabled = false;
             btn.textContent = 'Toplu Ekle';
             loadFilms();
