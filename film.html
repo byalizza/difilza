@@ -243,10 +243,22 @@
             audio.currentTime = parseFloat(savedPos);
         }
 
+        let firstPlay = true;
+        function tryAutoPlay() {
+            if (firstPlay && audio.paused) {
+                audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
+                firstPlay = false;
+            }
+        }
+
         const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
         if (wasPlaying === 'true') {
             audio.play().then(() => updateUI(true)).catch(() => updateUI(false));
+            firstPlay = false;
         }
+
+        document.addEventListener('click', tryAutoPlay, { once: false });
+        document.addEventListener('keydown', tryAutoPlay, { once: false });
 
         audio.addEventListener('timeupdate', () => {
             localStorage.setItem(MUSIC_KEY, audio.currentTime);
