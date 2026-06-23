@@ -574,17 +574,5 @@
     "imdb": "",
     "description": "Teresa kuzeninin New York'taki restoranının açılışı için ailece sevdikleri bir Meksika yemeğini hazırlamaya çalışırken arkadaşları ona yardımcı olur.",
     "createdAt": "2026-06-23T16:02:54.435Z"
-  },
-  {
-    "id": "6946700a-04d5-47df-86f9-e659a275d613",
-    "title": "Test Film",
-    "originalTitle": "",
-    "embedUrl": "https://example.com/embed/test",
-    "poster": "",
-    "category": "Genel",
-    "year": "",
-    "imdb": "",
-    "description": "",
-    "createdAt": "2026-06-23T16:02:54.079Z"
   }
 ]
