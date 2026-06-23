@@ -6,9 +6,11 @@
     <title>DİFİLZA - Film İzle</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="watermark">DİFİLZA</div>
+
     <header>
         <div class="container">
             <a href="index.html" class="logo">
@@ -21,6 +23,10 @@
                 <a href="#" onclick="filterByCategory('Korku')">Korku</a>
                 <a href="#" onclick="filterByCategory('Bilim Kurgu')">Bilim Kurgu</a>
                 <a href="#" onclick="filterByCategory('Dram')">Dram</a>
+                <a href="#" onclick="filterByCategory('Animasyon')">Animasyon</a>
+                <a href="#" onclick="filterByCategory('Macera')">Macera</a>
+                <a href="#" onclick="filterByCategory('Gerilim')">Gerilim</a>
+                <a href="#" onclick="filterByCategory('Romantik')">Romantik</a>
             </nav>
             <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
             <div class="search-box">
@@ -32,8 +38,8 @@
     <main>
         <div class="container">
             <div class="hero">
-                <h1>Türkçe Dublaj & Altyazılı Filmler</h1>
-                <p>Binlerce filmi HD kalitede izle</p>
+                <h1>Binlerce Film HD Kalitede</h1>
+                <p>Türkçe dublaj ve altyazılı en yeni filmler</p>
             </div>
 
             <div class="filter-bar">
@@ -46,7 +52,10 @@
             </div>
 
             <div class="films-grid" id="filmsGrid">
-                <div class="loading">Filmler yükleniyor...</div>
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Filmler yükleniyor...
+                </div>
             </div>
 
             <div class="pagination" id="pagination"></div>
@@ -127,37 +136,5 @@
             audio.pause();
         });
     </script>
-    <style>
-        #musicToggle {
-            background: none;
-            border: 2px solid rgba(255,255,255,0.15);
-            color: #888;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-        #musicToggle:hover {
-            border-color: rgba(255,255,255,0.3);
-            color: #fff;
-        }
-        #musicToggle.active {
-            border-color: #6c5ce7;
-            color: #6c5ce7;
-            box-shadow: 0 0 15px rgba(108,92,231,0.3);
-            animation: musicPulse 2s infinite;
-        }
-        @keyframes musicPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(108,92,231,0.3); }
-            50% { box-shadow: 0 0 25px rgba(108,92,231,0.6); }
-        }
-        #bgAudio { display: none; }
-    </style>
 </body>
 </html>
