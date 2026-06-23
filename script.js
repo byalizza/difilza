@@ -2,13 +2,15 @@ const API_URL = 'https://difilza.onrender.com';
 
 let currentPage = 1;
 let currentCategory = '';
+let currentYear = '';
 let currentSearch = '';
 
-async function fetchFilms(page = 1, search = '', category = '') {
+async function fetchFilms(page = 1, search = '', category = '', year = '') {
     try {
         let url = `${API_URL}/api/films?page=${page}&limit=20`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (category) url += `&category=${encodeURIComponent(category)}`;
+        if (year) url += `&year=${encodeURIComponent(year)}`;
 
         const response = await fetch(url);
         const data = await response.json();
@@ -85,29 +87,40 @@ async function goToPage(page) {
     const grid = document.getElementById('filmsGrid');
     grid.innerHTML = '<div class="loading"><div class="spinner"></div>Yükleniyor...</div>';
 
-    const data = await fetchFilms(page, currentSearch, currentCategory);
+    const data = await fetchFilms(page, currentSearch, currentCategory, currentYear);
     renderFilms(data.films);
     renderPagination(data.totalPages, page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function filterFilms() {
-    const category = document.getElementById('categoryFilter').value;
-    const year = document.getElementById('yearFilter').value;
-    currentCategory = category;
+function filterByYear(year) {
+    currentYear = year;
     currentPage = 1;
-
     const grid = document.getElementById('filmsGrid');
     grid.innerHTML = '<div class="loading"><div class="spinner"></div>Yükleniyor...</div>';
-
-    const data = await fetchFilms(1, currentSearch, category);
-    renderFilms(data.films);
-    renderPagination(data.totalPages, 1);
+    fetchFilms(1, currentSearch, currentCategory, currentYear).then(data => {
+        renderFilms(data.films);
+        renderPagination(data.totalPages, 1);
+    });
 }
 
 function filterByCategory(category) {
-    document.getElementById('categoryFilter').value = category;
-    filterFilms();
+    currentCategory = currentCategory === category ? '' : category;
+    currentPage = 1;
+    document.querySelectorAll('header nav a').forEach(a => a.classList.remove('active'));
+    if (currentCategory) {
+        document.querySelectorAll('header nav a').forEach(a => {
+            if (a.textContent === category) a.classList.add('active');
+        });
+    } else {
+        document.querySelector('header nav a:first-child').classList.add('active');
+    }
+    const grid = document.getElementById('filmsGrid');
+    grid.innerHTML = '<div class="loading"><div class="spinner"></div>Yükleniyor...</div>';
+    fetchFilms(1, currentSearch, currentCategory, currentYear).then(data => {
+        renderFilms(data.films);
+        renderPagination(data.totalPages, 1);
+    });
 }
 
 function searchFilms() {
@@ -118,7 +131,7 @@ function searchFilms() {
     const grid = document.getElementById('filmsGrid');
     grid.innerHTML = '<div class="loading"><div class="spinner"></div>Film aranıyor...</div>';
 
-    fetchFilms(1, search, currentCategory).then(data => {
+    fetchFilms(1, search, currentCategory, currentYear).then(data => {
         renderFilms(data.films);
         renderPagination(data.totalPages, 1);
     });
@@ -128,17 +141,9 @@ async function loadCategories() {
     try {
         const res = await fetch(`${API_URL}/api/films?limit=1000`);
         const data = await res.json();
-        const categories = [...new Set(data.films.map(f => f.category).filter(Boolean))];
-        const select = document.getElementById('categoryFilter');
-        categories.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c;
-            opt.textContent = c;
-            select.appendChild(opt);
-        });
 
         const years = [...new Set(data.films.map(f => f.year).filter(y => y))].sort((a, b) => b - a);
-        const yearSelect = document.getElementById('yearFilter');
+        const yearSelect = document.getElementById('yearHeaderFilter');
         years.forEach(y => {
             const opt = document.createElement('option');
             opt.value = y;
@@ -150,7 +155,7 @@ async function loadCategories() {
 
 loadCategories();
 
-fetchFilms(1, '', '').then(data => {
+fetchFilms(1, '', '', '').then(data => {
     renderFilms(data.films);
     renderPagination(data.totalPages, 1);
 });
