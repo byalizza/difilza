@@ -39,8 +39,13 @@ app.get('/api/films', (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const search = req.query.search || '';
     const category = req.query.category || '';
+    const hasPoster = req.query.hasPoster === 'true';
 
     let filtered = films;
+
+    if (hasPoster) {
+        filtered = filtered.filter(f => f.poster && f.poster.startsWith('http'));
+    }
 
     if (search) {
         filtered = filtered.filter(f =>

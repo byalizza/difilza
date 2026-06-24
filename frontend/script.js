@@ -7,7 +7,7 @@ let currentSearch = '';
 
 async function fetchFilms(page = 1, search = '', category = '', year = '') {
     try {
-        let url = `${API_URL}/api/films?page=${page}&limit=20`;
+        let url = `${API_URL}/api/films?page=${page}&limit=20&hasPoster=true`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (category) url += `&category=${encodeURIComponent(category)}`;
         if (year) url += `&year=${encodeURIComponent(year)}`;
