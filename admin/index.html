@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DİFİLZA - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .login-box h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-box h1 span {
+            color: #6c5ce7;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 0;
+        }
+
+        .admin-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-header h1 {
+            font-size: 22px;
+        }
+
+        .admin-header h1 span {
+            color: #6c5ce7;
+        }
+
+        .admin-header .logout-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .admin-header .logout-btn:hover {
+            background: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .admin-content {
+            padding: 30px 0;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #6c5ce7;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #5a4bd1;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger-outline:hover {
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .films-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .films-table th,
+        .films-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .films-table th {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .films-table td {
+            font-size: 14px;
+        }
+
+        .films-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .films-table .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .films-table .actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .status-msg {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-msg.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .status-msg.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: #6c5ce7;
+        }
+
+        .film-count {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <h1><span>D</span>İFİL<span>Z</span>A</h1>
+            <p>Admin Paneline Giriş</p>
+            <div class="form-group">
+                <label>Admin Şifresi</label>
+                <input type="password" id="loginKey" placeholder="Şifrenizi girin" onkeypress="if(event.key==='Enter')login()">
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="login()">Giriş Yap</button>
+        </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <div class="container">
+                <h1><span>D</span>İFİL<span>Z</span>A Admin</h1>
+                <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div class="container">
+                <div class="status-msg" id="statusMsg"></div>
+
+                <div class="form-section">
+                    <h2 id="formTitle">Film Ekle</h2>
+                    <input type="hidden" id="editFilmId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Film Adı (Türkçe)</label>
+                            <input type="text" id="filmTitle" placeholder="Örn: Batman Başlangıç" onchange="autoFillFromTitle()">
+                        </div>
+                        <div class="form-group">
+                            <label>Orijinal Ad</label>
+                            <input type="text" id="originalTitle" placeholder="Örn: Batman Begins">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Embed Linki</label>
+                        <input type="text" id="embedUrl" placeholder="Örn: https://rapidvid.net/vod/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Poster URL (opsiyonel)</label>
+                        <input type="text" id="posterUrl" placeholder="Örn: https://image.tmdb.org/...">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Yıl</label>
+                            <input type="text" id="filmYear" placeholder="Örn: 2024">
+                        </div>
+                        <div class="form-group" id="filmCategoryGroup" style="display:none">
+                            <label>Kategori</label>
+                            <select id="filmCategory">
+                                <option value="Aksiyon">Aksiyon</option>
+                                <option value="Komedi">Komedi</option>
+                                <option value="Korku">Korku</option>
+                                <option value="Bilim Kurgu">Bilim Kurgu</option>
+                                <option value="Dram">Dram</option>
+                                <option value="Romantik">Romantik</option>
+                                <option value="Animasyon">Animasyon</option>
+                                <option value="Macera">Macera</option>
+                                <option value="Gerilim">Gerilim</option>
+                                <option value="Suç">Suç</option>
+                                <option value="Fantastik">Fantastik</option>
+                                <option value="Savaş">Savaş</option>
+                                <option value="Belgesel">Belgesel</option>
+                                <option value="Aile">Aile</option>
+                                <option value="Tarih">Tarih</option>
+                                <option value="Müzik">Müzik</option>
+                                <option value="Gizem">Gizem</option>
+                                <option value="Genel">Genel</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>IMDB Puanı</label>
+                            <input type="text" id="filmImdb" placeholder="Örn: 8.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Oyuncular</label>
+                            <input type="text" id="filmActors" placeholder="Örn: Tom Hardy, Anne Hathaway">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea id="filmDescription" placeholder="Film hakkında kısa bir açıklama..."></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="saveFilm()">Kaydet</button>
+                        <button class="btn btn-secondary" onclick="resetForm()">İptal</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Toplu Film Ekle</h2>
+                    <p style="color:#666;font-size:13px;margin-bottom:15px">Format: <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px">film_url -> embed_url</code> (satır satır yapıştır)</p>
+                    <div class="form-group">
+                        <textarea id="bulkInput" placeholder="https://www.fullhdfilmizlesene.life/film/batman/ -> https://rapidvid.net/vod/xxx&#10;https://www.fullhdfilmizlesene.life/film/superman/ -> https://rapidvid.net/vod/yyy" style="min-height:200px;font-family:monospace;font-size:12px"></textarea>
+                    </div>
+                    <div id="bulkProgress" style="display:none;margin-bottom:15px">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:15px">
+                            <div id="bulkStatus" style="margin-bottom:10px;font-size:14px"></div>
+                            <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:8px;overflow:hidden">
+                                <div id="bulkBar" style="background:#6c5ce7;height:100%;width:0%;transition:width 0.3s;border-radius:4px"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="bulkAddFilms()" id="bulkBtn">Toplu Ekle</button>
+                        <button class="btn btn-danger" onclick="cancelBulkAdd()" id="cancelBulkBtn" style="display:none">İptal</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('bulkInput').value=''">Temizle</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Filmler</h2>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Film ara..." oninput="searchFilms()">
+                    </div>
+                    <div class="film-count" id="filmCount"></div>
+                    <div class="btn-group" style="margin-bottom: 10px;">
+                        <button class="btn btn-primary" onclick="recategorizeAll()" id="recatBtn" style="font-size:12px">TMDB'ye Göre Kategorilendir</button>
+                        <button class="btn btn-danger-outline" onclick="deleteLatestFilms()" id="deleteLatestBtn" style="font-size:12px">Son Eklenenleri Sil</button>
+                        <button class="btn btn-danger" onclick="deleteAllFilms()" id="deleteAllBtn" style="font-size:12px">Tümünü Sil</button>
+                    </div>
+                    <table class="films-table">
+                        <thead>
+                            <tr>
+                                <th>Film</th>
+                                <th>Kategori</th>
+                                <th>Yıl</th>
+                                <th>IMDB</th>
+                                <th>Tarih</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filmsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://difilza.onrender.com';
+        let ADMIN_KEY = '';
+        let allFilms = [];
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            setTimeout(() => { el.className = 'status-msg'; }, 3000);
+        }
+
+        function login() {
+            const key = document.getElementById('loginKey').value;
+            if (!key) {
+                showStatus('Şifre girin!', 'error');
+                return;
+            }
+            ADMIN_KEY = key;
+            fetch(`${API_URL}/api/films?limit=1`, {
+                headers: { 'X-Admin-Key': ADMIN_KEY }
+            })
+            .then(r => {
+                if (!r.ok) throw new Error();
+                return r.json();
+            })
+            .then(() => {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadFilms();
+            })
+            .catch(() => {
+                showStatus('Yanlış şifre!', 'error');
+            });
+        }
+
+        function logout() {
+            ADMIN_KEY = '';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginKey').value = '';
+        }
+
+        async function loadFilms() {
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                allFilms = data.films;
+                renderFilmsList(allFilms);
+            } catch (e) {
+                showStatus('Filmler yüklenemedi!', 'error');
+            }
+        }
+
+        function renderFilmsList(films) {
+            document.getElementById('filmCount').textContent = `Toplam ${films.length} film`;
+            const tbody = document.getElementById('filmsList');
+
+            if (!films.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666">Film bulunamadı</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = films.map(f => `
+                <tr>
+                    <td><strong>${f.title}</strong><br><small style="color:#666">${f.originalTitle || ''}</small></td>
+                    <td>${f.category || '-'}</td>
+                    <td>${f.year || '-'}</td>
+                    <td>${f.imdb || '-'}</td>
+                    <td>${new Date(f.createdAt).toLocaleDateString('tr-TR')}</td>
+                    <td class="actions">
+                        <button class="btn btn-secondary" onclick="editFilm('${f.id}')">Düzenle</button>
+                        <button class="btn btn-danger" onclick="deleteFilm('${f.id}')">Sil</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchFilms() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allFilms.filter(f =>
+                f.title.toLowerCase().includes(q) ||
+                (f.originalTitle && f.originalTitle.toLowerCase().includes(q))
+            );
+            renderFilmsList(filtered);
+        }
+
+        async function saveFilm() {
+            const editId = document.getElementById('editFilmId').value;
+            const data = {
+                title: document.getElementById('filmTitle').value,
+                originalTitle: document.getElementById('originalTitle').value,
+                embedUrl: document.getElementById('embedUrl').value,
+                poster: document.getElementById('posterUrl').value,
+                category: document.getElementById('filmCategory').value,
+                year: document.getElementById('filmYear').value,
+                imdb: document.getElementById('filmImdb').value,
+                actors: document.getElementById('filmActors').value,
+                description: document.getElementById('filmDescription').value,
+            };
+
+            if (!editId && !data.category) data.category = 'Genel';
+
+            if (!data.title || !data.embedUrl) {
+                showStatus('Film adı ve embed linki zorunludur!', 'error');
+                return;
+            }
+
+            try {
+                let res;
+                if (editId) {
+                    res = await fetch(`${API_URL}/api/films/${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': ADMIN_KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    res = await fetch(`${API_URL}/api/films`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': ADMIN_KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (!res.ok) throw new Error();
+
+                showStatus(editId ? 'Film güncellendi!' : 'Film eklendi!', 'success');
+                resetForm();
+                loadFilms();
+            } catch (e) {
+                showStatus('İşlem başarısız!', 'error');
+            }
+        }
+
+        async function editFilm(id) {
+            try {
+                const res = await fetch(`${API_URL}/api/films/${id}`);
+                const film = await res.json();
+
+                document.getElementById('editFilmId').value = film.id;
+                document.getElementById('formTitle').textContent = 'Film Düzenle';
+                document.getElementById('filmTitle').value = film.title;
+                document.getElementById('originalTitle').value = film.originalTitle || '';
+                document.getElementById('embedUrl').value = film.embedUrl;
+                document.getElementById('posterUrl').value = film.poster || '';
+                document.getElementById('filmCategory').value = film.category || 'Genel';
+                document.getElementById('filmCategoryGroup').style.display = 'block';
+                document.getElementById('filmYear').value = film.year || '';
+                document.getElementById('filmImdb').value = film.imdb || '';
+                document.getElementById('filmActors').value = film.actors || '';
+                document.getElementById('filmDescription').value = film.description || '';
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {
+                showStatus('Film yüklenemedi!', 'error');
+            }
+        }
+
+        async function deleteFilm(id) {
+            try {
+                const res = await fetch(`${API_URL}/api/films/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+
+                if (!res.ok) throw new Error();
+
+                showStatus('Film silindi!', 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Silme başarısız!', 'error');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editFilmId').value = '';
+            document.getElementById('formTitle').textContent = 'Film Ekle';
+            document.getElementById('filmTitle').value = '';
+            document.getElementById('originalTitle').value = '';
+            document.getElementById('embedUrl').value = '';
+            document.getElementById('posterUrl').value = '';
+            document.getElementById('filmYear').value = '';
+            document.getElementById('filmImdb').value = '';
+            document.getElementById('filmActors').value = '';
+            document.getElementById('filmDescription').value = '';
+            document.getElementById('filmCategoryGroup').style.display = 'none';
+        }
+
+        async function autoFillFromTitle() {
+            const title = document.getElementById('filmTitle').value.trim();
+            if (!title || document.getElementById('editFilmId').value) return;
+            const tmdb = await searchTMDB(title);
+            if (tmdb.originalTitle) document.getElementById('originalTitle').value = tmdb.originalTitle;
+            if (tmdb.year) document.getElementById('filmYear').value = tmdb.year;
+            if (tmdb.imdb) document.getElementById('filmImdb').value = tmdb.imdb;
+            if (tmdb.actors) document.getElementById('filmActors').value = tmdb.actors;
+            if (tmdb.description) document.getElementById('filmDescription').value = tmdb.description;
+            if (tmdb.poster) document.getElementById('posterUrl').value = tmdb.poster;
+            if (tmdb.category) {
+                document.getElementById('filmCategory').value = tmdb.category;
+            }
+        }
+
+        function extractTitle(url) {
+            try {
+                const u = new URL(url);
+                const parts = u.pathname.split('/').filter(Boolean);
+                let slug = parts[parts.length - 1] || '';
+                slug = slug.replace(/\/$/, '');
+                if (slug.includes('/film/')) {
+                    slug = slug.split('/film/')[1] || slug;
+                }
+                return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            } catch {
+                return '';
+            }
+        }
+
+        const TMDB_GENRE_MAP = {
+            28: 'Aksiyon', 12: 'Macera', 16: 'Animasyon', 35: 'Komedi',
+            80: 'Suç', 99: 'Belgesel', 18: 'Dram', 10751: 'Aile',
+            14: 'Fantastik', 36: 'Tarih', 27: 'Korku', 10402: 'Müzik',
+            9648: 'Gerilim', 10749: 'Romantik', 878: 'Bilim Kurgu',
+            53: 'Gerilim', 10752: 'Savaş', 37: 'Macera'
+        };
+
+        function tmdbGenreToCategory(genreIds) {
+            if (!genreIds || !genreIds.length) return 'Genel';
+            for (const id of genreIds) {
+                if (TMDB_GENRE_MAP[id]) return TMDB_GENRE_MAP[id];
+            }
+            return 'Genel';
+        }
+
+        async function searchTMDB(title) {
+            const TMDB_KEY = '69a87754059ce146a5d322ae235a1702';
+            const result = { originalTitle: '', year: '', poster: '', description: '', actors: '', imdb: '', category: '' };
+
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`);
+                const data = await res.json();
+                if (!data.results || !data.results[0]) return result;
+
+                const m = data.results[0];
+                result.originalTitle = m.original_title || '';
+                result.year = (m.release_date || '').substring(0, 4);
+                result.description = m.overview || '';
+                result.poster = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
+                result.imdb = m.vote_average ? m.vote_average.toFixed(1) : '';
+                result.category = tmdbGenreToCategory(m.genre_ids);
+
+                try {
+                    const detailRes = await fetch(`https://api.themoviedb.org/3/movie/${m.id}?api_key=${TMDB_KEY}&language=tr-TR`);
+                    const detail = await detailRes.json();
+                    if (detail.genres && detail.genres.length) {
+                        result.category = tmdbGenreToCategory(detail.genres.map(g => g.id));
+                    }
+                } catch (e) {}
+
+                try {
+                    const creditsRes = await fetch(`https://api.themoviedb.org/3/movie/${m.id}/credits?api_key=${TMDB_KEY}&language=tr-TR`);
+                    const credits = await creditsRes.json();
+                    if (credits.cast) {
+                        result.actors = credits.cast.slice(0, 5).map(a => a.name).join(', ');
+                    }
+                } catch (e) {}
+
+                if (!result.poster) {
+                    try {
+                        const imgRes = await fetch(`https://www.google.com/search?q=${encodeURIComponent(title + ' film afiş poster')}&tbm=isch&tbs=isz:m`, {
+                            headers: { 'User-Agent': 'Mozilla/5.0' }
+                        });
+                        const html = await imgRes.text();
+                        const match = html.match(/https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)/i);
+                        if (match) result.poster = match[0];
+                    } catch (e) {}
+                }
+
+                return result;
+            } catch (e) {}
+            return result;
+        }
+
+        async function bulkAddFilms() {
+            const input = document.getElementById('bulkInput').value.trim();
+            if (!input) { showStatus('Metin yapıştırın!', 'error'); return; }
+
+            const lines = input.split('\n').filter(l => l.includes('->') && !l.includes('BULUNAMADI'));
+            if (!lines.length) { showStatus('Geçerli satır bulunamadı!', 'error'); return; }
+
+            const progress = document.getElementById('bulkProgress');
+            const bar = document.getElementById('bulkBar');
+            const status = document.getElementById('bulkStatus');
+            const btn = document.getElementById('bulkBtn');
+            progress.style.display = 'block';
+            btn.disabled = true;
+            btn.textContent = 'Ekleniyor...';
+
+            let added = 0, skipped = 0, failed = 0;
+            window._bulkCancelled = false;
+
+            const cancelBtn = document.getElementById('cancelBulkBtn');
+            cancelBtn.style.display = 'inline-block';
+
+            const existingRes = await fetch(`${API_URL}/api/films?limit=1000`);
+            const existingData = await existingRes.json();
+            const existingTitles = new Set(existingData.films.map(f => f.title.toLowerCase()));
+
+            for (let i = 0; i < lines.length; i++) {
+                const parts = lines[i].split('->');
+                const filmUrl = parts[0].trim();
+                const embedUrl = parts[1].trim();
+                const title = extractTitle(filmUrl);
+
+                status.textContent = `[${i+1}/${lines.length}] ${title} ekleniyor...`;
+                bar.style.width = `${((i+1)/lines.length)*100}%`;
+
+                if (window._bulkCancelled) {
+                    status.textContent = 'İptal edildi!';
+                    break;
+                }
+
+                if (existingTitles.has(title.toLowerCase())) {
+                    skipped++;
+                    continue;
+                }
+
+                if (!embedUrl || !embedUrl.startsWith('http')) {
+                    console.error('Gecersiz embed URL:', embedUrl);
+                    failed++;
+                    continue;
+                }
+
+                const tmdb = await searchTMDB(title);
+
+                    try {
+                        const res = await fetch(`${API_URL}/api/films`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
+                            body: JSON.stringify({
+                                title,
+                                originalTitle: tmdb.originalTitle,
+                                embedUrl,
+                                poster: tmdb.poster,
+                                category: tmdb.category || 'Genel',
+                                year: tmdb.year,
+                                imdb: tmdb.imdb,
+                                actors: tmdb.actors,
+                                description: tmdb.description
+                            })
+                        });
+                    if (res.ok) { added++; existingTitles.add(title.toLowerCase()); } else {
+                        const err = await res.text();
+                        console.error('Film ekleme hatasi:', title, res.status, err);
+                        failed++;
+                    }
+                } catch (e) {
+                    console.error('Film ekleme exception:', title, e.message);
+                    failed++;
+                }
+            }
+
+            status.textContent = `Tamamlandı! ${added} eklendi, ${skipped} atlandı (mevcut), ${failed} başarısız`;
+            btn.disabled = false;
+            btn.textContent = 'Toplu Ekle';
+            cancelBtn.style.display = 'none';
+            window._bulkCancelled = false;
+            loadFilms();
+        }
+
+        async function recategorizeAll() {
+            if (!confirm('Tüm filmler TMDB\'ye göre yeniden kategorilendirilecek. Emin misin?')) return;
+
+            const btn = document.getElementById('recatBtn');
+            btn.disabled = true;
+            btn.textContent = 'Kategorilendiriliyor...';
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+
+                let updated = 0, failed = 0;
+                for (let i = 0; i < films.length; i++) {
+                    const f = films[i];
+                    const tmdb = await searchTMDB(f.title);
+                    if (tmdb.category && tmdb.category !== f.category) {
+                        const updateRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'X-Admin-Key': ADMIN_KEY },
+                            body: JSON.stringify({
+                                title: f.title,
+                                originalTitle: f.originalTitle || tmdb.originalTitle,
+                                embedUrl: f.embedUrl,
+                                poster: f.poster || tmdb.poster,
+                                category: tmdb.category,
+                                year: f.year || tmdb.year,
+                                imdb: f.imdb || tmdb.imdb,
+                                actors: f.actors || tmdb.actors,
+                                description: f.description || tmdb.description
+                            })
+                        });
+                        if (updateRes.ok) updated++;
+                        else failed++;
+                    }
+                }
+
+                showStatus(`${updated} film kategorilendirildi, ${failed} başarısız`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'TMDB\'ye Göre Kategorilendir';
+        }
+
+        function cancelBulkAdd() {
+            window._bulkCancelled = true;
+            document.getElementById('cancelBulkBtn').style.display = 'none';
+            document.getElementById('bulkStatus').textContent = 'İptal ediliyor...';
+        }
+
+        async function deleteLatestFilms() {
+            const count = prompt('Kaç film silinsin? (en son eklenenlerden)', '5');
+            if (!count || isNaN(count) || parseInt(count) < 1) return;
+
+            if (!confirm(`Son ${count} film silinecek. Emin misin?`)) return;
+
+            const btn = document.getElementById('deleteLatestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Siliniyor...';
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+                const toDelete = films.slice(-parseInt(count));
+
+                let deleted = 0;
+                for (const f of toDelete) {
+                    const delRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-Admin-Key': ADMIN_KEY }
+                    });
+                    if (delRes.ok) deleted++;
+                }
+
+                showStatus(`${deleted} film silindi!`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Son Eklenenleri Sil';
+        }
+
+        async function deleteAllFilms() {
+            if (!confirm('TÜM filmler silinecek! Emin misin?')) return;
+            const confirm2 = prompt('Onaylamak için "SİL" yazın');
+            if (confirm2 !== 'SİL') return;
+
+            const btn = document.getElementById('deleteAllBtn');
+            btn.disabled = true;
+            btn.textContent = 'Tümü siliniyor...';
+
+            const progressDiv = document.createElement('div');
+            progressDiv.style.cssText = 'margin:10px 0;background:rgba(255,255,255,0.05);border-radius:8px;padding:15px';
+            progressDiv.innerHTML = '<div id="deleteAllStatus" style="margin-bottom:8px;font-size:13px"></div><div style="background:rgba(255,255,255,0.1);border-radius:4px;height:8px;overflow:hidden"><div id="deleteAllBar" style="background:#e74c3c;height:100%;width:0%;transition:width 0.2s;border-radius:4px"></div></div>';
+            btn.parentNode.insertBefore(progressDiv, btn.nextSibling);
+
+            try {
+                const res = await fetch(`${API_URL}/api/films?limit=1000`);
+                const data = await res.json();
+                const films = data.films;
+                const total = films.length;
+
+                let deleted = 0;
+                for (const f of films) {
+                    const delRes = await fetch(`${API_URL}/api/films/${f.id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-Admin-Key': ADMIN_KEY }
+                    });
+                    if (delRes.ok) deleted++;
+                    document.getElementById('deleteAllStatus').textContent = `${deleted} / ${total} silindi`;
+                    document.getElementById('deleteAllBar').style.width = `${(deleted/total)*100}%`;
+                }
+
+                document.getElementById('deleteAllStatus').textContent = `${deleted} film silindi!`;
+                showStatus(`${deleted} film silindi!`, 'success');
+                loadFilms();
+            } catch (e) {
+                showStatus('Hata: ' + e.message, 'error');
+                const el = document.getElementById('deleteAllStatus');
+                if (el) el.textContent = 'Hata: ' + e.message;
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Tümünü Sil';
+        }
+    </script>
+</body>
+</html>

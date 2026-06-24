@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DİFİLZA - Film İzle</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="watermark">DİFİLZA</div>
+
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-d">D</span>İFİL<span class="logo-z">Z</span>A
+            </a>
+            <nav>
+                <a href="index.html">Ana Sayfa</a>
+            </nav>
+            <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="container film-page">
+            <a href="index.html" class="back-btn">← Geri Dön</a>
+
+            <div class="player-container" id="player">
+                <div class="loading-player">
+                    <div class="spinner"></div>
+                    Film yükleniyor...
+                </div>
+            </div>
+
+            <div class="film-details">
+                <div class="film-poster" id="filmPoster">
+                    <div class="no-poster">🎬</div>
+                </div>
+                <div class="film-info">
+                    <h1 id="filmTitle">-</h1>
+                    <div class="original-title" id="originalTitle"></div>
+                    <div class="film-meta">
+                        <span id="filmYear">📅 -</span>
+                        <span class="imdb" id="filmImdb">⭐ -</span>
+                        <span class="category" id="filmCategory">📁 -</span>
+                    </div>
+                    <div class="film-actors" id="filmActors"></div>
+                    <p class="film-description" id="filmDescription"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 DİFİLZA. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <audio id="bgAudio" src="bgmusic.mp3" loop preload="auto"></audio>
+
+    <script>
+        const API_URL = 'https://difilza.onrender.com';
+        const audio = document.getElementById('bgAudio');
+        const toggleBtn = document.getElementById('musicToggle');
+        const MUSIC_KEY = 'difilza_music_position';
+        const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
+
+        const savedPos = localStorage.getItem(MUSIC_KEY);
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
+
+        audio.addEventListener('timeupdate', () => {
+            localStorage.setItem(MUSIC_KEY, audio.currentTime);
+        });
+
+        audio.addEventListener('play', () => {
+            toggleBtn.classList.add('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
+        });
+        audio.addEventListener('pause', () => {
+            toggleBtn.classList.remove('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
+        });
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play().catch(() => {});
+            } else {
+                audio.pause();
+            }
+        }
+
+        localStorage.setItem('difilza_on_film', 'true');
+
+        window.addEventListener('beforeunload', () => {
+            audio.pause();
+        });
+
+        async function loadFilm() {
+            const params = new URLSearchParams(window.location.search);
+            const filmId = params.get('id');
+            if (!filmId) {
+                document.getElementById('player').innerHTML = '<div class="loading-player">Film ID bulunamadı</div>';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/films/${filmId}`);
+                const film = await response.json();
+                document.title = `${film.title} - DİFİLZA`;
+                document.getElementById('filmTitle').textContent = film.title;
+                document.getElementById('originalTitle').textContent = film.originalTitle || '';
+                document.getElementById('filmYear').textContent = `📅 ${film.year || '-'}`;
+                document.getElementById('filmImdb').textContent = `⭐ ${film.imdb || '-'}`;
+                document.getElementById('filmCategory').textContent = `📁 ${film.category || 'Genel'}`;
+                document.getElementById('filmDescription').textContent = film.description || 'Açıklama bulunmuyor.';
+                if (film.actors) {
+                    document.getElementById('filmActors').innerHTML = `<strong>Oyuncular:</strong> ${film.actors}`;
+                }
+                if (film.poster) {
+                    document.getElementById('filmPoster').innerHTML = `<img src="${film.poster}" alt="${film.title}">`;
+                }
+                document.getElementById('player').innerHTML = `<iframe src="${film.embedUrl}" allowfullscreen allow="autoplay; fullscreen" frameborder="0"></iframe>`;
+            } catch (error) {
+                document.getElementById('player').innerHTML = '<div class="loading-player">Film yüklenirken hata oluştu</div>';
+            }
+        }
+
+        loadFilm();
+    </script>
+</body>
+</html>

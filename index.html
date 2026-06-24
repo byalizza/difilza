@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DİFİLZA - Film İzle</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="watermark">DİFİLZA</div>
+
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-d">D</span>İFİL<span class="logo-z">Z</span>A
+            </a>
+            <nav>
+                <a href="index.html" class="active">Ana Sayfa</a>
+                <a href="#" onclick="filterByCategory('Aksiyon')">Aksiyon</a>
+                <a href="#" onclick="filterByCategory('Komedi')">Komedi</a>
+                <a href="#" onclick="filterByCategory('Korku')">Korku</a>
+                <a href="#" onclick="filterByCategory('Bilim Kurgu')">Bilim Kurgu</a>
+                <a href="#" onclick="filterByCategory('Dram')">Dram</a>
+                <a href="#" onclick="filterByCategory('Animasyon')">Animasyon</a>
+                <a href="#" onclick="filterByCategory('Macera')">Macera</a>
+                <a href="#" onclick="filterByCategory('Gerilim')">Gerilim</a>
+                <a href="#" onclick="filterByCategory('Romantik')">Romantik</a>
+            </nav>
+            <select id="yearHeaderFilter" onchange="filterByYear(this.value)" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-secondary);padding:6px 28px 6px 10px;border-radius:16px;font-size:12px;outline:none;cursor:pointer;font-family:inherit;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'8\' height=\'8\' viewBox=\'0 0 8 8\'%3E%3Cpath fill=\'%238888aa\' d=\'M4 6L1 2h6z\'/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 8px center;flex-shrink:0">
+                <option value="">Yıl</option>
+            </select>
+            <button id="musicToggle" onclick="toggleMusic()" title="Müzik">♪</button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Film ara..." onkeyup="searchFilms()">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>Binlerce Film HD Kalitede</h1>
+                <p>Türkçe dublaj ve altyazılı en yeni filmler</p>
+            </div>
+
+            <div class="films-grid" id="filmsGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Filmler yükleniyor...
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 DİFİLZA. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <audio id="bgAudio" src="bgmusic.mp3" loop preload="auto"></audio>
+
+    <script src="script.js"></script>
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const toggleBtn = document.getElementById('musicToggle');
+        const MUSIC_KEY = 'difilza_music_position';
+        const MUSIC_VOL_KEY = 'difilza_music_volume';
+        const MUSIC_PLAYING_KEY = 'difilza_music_playing';
+
+        let isPlaying = false;
+
+        const savedPos = localStorage.getItem(MUSIC_KEY);
+        if (savedPos) audio.currentTime = parseFloat(savedPos);
+        const savedVol = localStorage.getItem(MUSIC_VOL_KEY);
+        if (savedVol !== null) audio.volume = parseFloat(savedVol);
+
+        audio.addEventListener('timeupdate', () => {
+            localStorage.setItem(MUSIC_KEY, audio.currentTime);
+        });
+
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            toggleBtn.classList.add('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'true');
+        });
+        audio.addEventListener('pause', () => {
+            isPlaying = false;
+            toggleBtn.classList.remove('active');
+            localStorage.setItem(MUSIC_PLAYING_KEY, 'false');
+        });
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play().catch(() => {});
+            } else {
+                audio.pause();
+            }
+        }
+
+        function tryResume() {
+            const onFilm = localStorage.getItem('difilza_on_film');
+            if (onFilm === 'true') {
+                localStorage.setItem('difilza_on_film', 'false');
+                audio.play().catch(() => {});
+                return;
+            }
+            const wasPlaying = localStorage.getItem(MUSIC_PLAYING_KEY);
+            if (wasPlaying === 'true') audio.play().catch(() => {});
+        }
+
+        window.addEventListener('pageshow', tryResume);
+        tryResume();
+
+        let started = false;
+
+        document.addEventListener('click', (e) => {
+            if (e.target === toggleBtn || toggleBtn.contains(e.target)) return;
+            if (!started && audio.paused) {
+                started = true;
+                audio.play().catch(() => {});
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            audio.pause();
+        });
+    </script>
+</body>
+</html>
